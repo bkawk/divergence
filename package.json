@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "./node_modules/.bin/eslint index.js",
-    "now": "nodemon index.js"
+    "now": "NODE_ENV='development' nodemon index.js"
   },
   "repository": {
     "type": "git",
@@ -21,7 +21,8 @@
   "dependencies": {
     "moment": "^2.22.1",
     "request": "^2.85.0",
-    "technicalindicators": "^1.1.10"
+    "technicalindicators": "^1.1.10",
+    "winston": "^2.4.2"
   },
   "devDependencies": {
     "eslint": "^4.19.1",
