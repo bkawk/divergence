@@ -208,7 +208,7 @@ return new Promise(function(resolve, reject) {
             let price = JSON.parse(data);
             if (!error) {
                 if (mode == 'last') {
-                    let time = moment.utc(price[0]).local().format('HH:mm');
+                    let time = moment.unix(price[0]).local().format('HH:mm');
                     resolve({
                         open: price[1],
                         close: price[2],
@@ -221,7 +221,7 @@ return new Promise(function(resolve, reject) {
                 if (mode == 'hist') {
                     let historicDataArray = [];
                     price.forEach((item) => {
-                    let time = moment.utc(item[0]).local().format('HH:mm:ss');
+                    let time = moment.unix(item[0]).local().format('HH:mm:ss');
                         historicDataArray.push({
                             open: item[1],
                             close: item[2],
