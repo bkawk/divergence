@@ -1,14 +1,13 @@
 'use strict';
 const request = require('request');
 const moment = require('moment');
-const RSI = require('technicalindicators').RSI;
+const RSI = require('@solazu/technicalindicators').RSI;
 const log = require('./logger.js');
 
 
 (() => {
     log.info('Starting');
-    monitorPair('1m', 'EOSUSD');
-    monitorPair('1m', 'BTCUSD');
+    monitorPair('1h', 'EOSUSD');
 })();
 
 /**
@@ -27,12 +26,10 @@ function monitorPair(timeFrame, pair) {
                 return calculateRSI(priceArray);
             })
             .then((data) => {
-                let price = data[0].reverse();
-                let rsi = data[1].reverse();
-                return detectDivergence(price, rsi, timeFrame, pair);
+                return detectDivergence(data[0], data[1], timeFrame, pair);
             })
             .then((divergence) => {
-                log.info(divergence);
+                // log.info(divergence);
             })
             .catch((error) => {
                 log.error(Error(error));
@@ -51,6 +48,15 @@ function monitorPair(timeFrame, pair) {
  */
 function detectDivergence(price, rsi, timeFrame, pair) {
     return new Promise(function(resolve, reject) {
+        let column2 = {
+            priceValue: price[2],
+            rsiValue: rsi[2],
+            priceSpike: spike(price[3], price[2], price[1]),
+            rsiSpike: spike(rsi[3], rsi[2], rsi[1]),
+        };
+        log.debug(column2);
+
+
         resolve({
             divergence: false,
             period: 0,
@@ -60,6 +66,22 @@ function detectDivergence(price, rsi, timeFrame, pair) {
     });
 }
 
+/**
+ * spike detector
+ * @param {number} left The value to the left of target
+ * @param {number} head The tagets value
+ * @param {number} right The value to the right of target
+ * @return {string} the string indicating direction
+ */
+function spike(left, head, right) {
+    if (head > left && head > right) {
+        return 'up';
+    } else if (head < left && head < right) {
+        return 'down';
+    } else {
+        return 'none';
+    }
+}
 
 /**
  * calculate RSI
@@ -72,8 +94,13 @@ function calculateRSI(priceArray) {
         priceArray.forEach((entry) => {
             closeArray.push(entry.close);
         });
-        let rsiArray = RSI.calculate({values: closeArray, period: 14});
-        resolve([closeArray, rsiArray]);
+        let inputRSI = {
+            values: closeArray,
+            period: 14,
+            reversedInput: true,
+        };
+        let rsiArray = (RSI.calculate(inputRSI));
+        resolve([closeArray.slice(0, 9), rsiArray.slice(0, 9)]);
     });
 }
 
