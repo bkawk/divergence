@@ -7,7 +7,12 @@ const log = require('./logger.js');
 
 (() => {
     log.info('Starting');
+    monitorPair('30m', 'EOSUSD');
     monitorPair('1h', 'EOSUSD');
+    monitorPair('3h', 'EOSUSD');
+    monitorPair('6h', 'EOSUSD');
+    monitorPair('12h', 'EOSUSD');
+    monitorPair('1D', 'EOSUSD');
 })();
 
 /**
@@ -58,9 +63,73 @@ function detectDivergence(price, rsi, timeFrame, pair) {
                     priceSpike: spike(price[i+1], price[i], price[i-1]),
                     rsiSpike: spike(rsi[i+1], rsi[i], rsi[i-1]),
                 };
-                column.push(data)
+                column.push(data);
             }
         });
+        twoPeriodBear(column, pair, timeFrame)
+        .then((data) => {
+            if (data.divergence) {
+                resolve(data);
+            } else {
+                return twoPeriodBull(column, pair, timeFrame);
+            }
+        })
+        .then((data) => {
+            if (data.divergence) {
+                resolve(data);
+            } else {
+                console.log(`No two period divergences detected 
+                for ${data.pair} on ${data.timeFrame}`);
+                // TODO: Check for 3 4 and 5 period
+            }
+        });
+    });
+}
+/**
+ * Detet two period bullish divergence
+ * @param {object} column The array of column data
+ * @param {object} pair The pair of column data
+ * @param {object} timeFrame The timeframe of column data
+ * @return {object} divergence report
+ */
+function twoPeriodBull(column, pair, timeFrame) {
+    return new Promise(function(resolve, reject) {
+        if (
+            column[2].priceSpike == 'down' &&
+            column[4].priceSpike == 'down' &&
+            column[2].rsiSpike == 'down' &&
+            column[4].rsiSpike == 'down' &&
+            column[4].priceValue > column[2].priceValue &&
+            column[4].rsiValue < column[2].rsiValue
+        ) {
+            resolve({
+                divergence: true,
+                period: 2,
+                direction: 'bullish',
+                pair: pair,
+                timeFrame: timeFrame,
+            });
+        } else {
+            resolve({
+                divergence: false,
+                period: 2,
+                direction: 'bullish',
+                pair: pair,
+                timeFrame: timeFrame,
+            });
+        }
+    });
+}
+
+/**
+ * Detet two period bearish divergence
+ * @param {object} column The array of column data
+ * @param {object} pair The pair of column data
+ * @param {object} timeFrame The timeframe of column data
+ * @return {object} divergence report
+ */
+function twoPeriodBear(column, pair, timeFrame) {
+    return new Promise(function(resolve, reject) {
         if (
             column[2].priceSpike == 'up' &&
             column[4].priceSpike == 'up' &&
@@ -79,9 +148,12 @@ function detectDivergence(price, rsi, timeFrame, pair) {
         } else {
             resolve({
                 divergence: false,
+                period: 2,
+                direction: 'bearish',
+                pair: pair,
+                timeFrame: timeFrame,
             });
         }
-
     });
 }
 
