@@ -29,7 +29,7 @@ function monitorPair(timeFrame, pair) {
                 return detectDivergence(data[0], data[1], timeFrame, pair);
             })
             .then((divergence) => {
-                // log.info(divergence);
+                log.info(divergence);
             })
             .catch((error) => {
                 log.error(Error(error));
@@ -48,21 +48,40 @@ function monitorPair(timeFrame, pair) {
  */
 function detectDivergence(price, rsi, timeFrame, pair) {
     return new Promise(function(resolve, reject) {
-        let column2 = {
-            priceValue: price[2],
-            rsiValue: rsi[2],
-            priceSpike: spike(price[3], price[2], price[1]),
-            rsiSpike: spike(rsi[3], rsi[2], rsi[1]),
-        };
-        log.debug(column2);
-
-
-        resolve({
-            divergence: false,
-            period: 0,
-            pair: pair,
-            timeFrame: timeFrame,
+        let column = [];
+        price.forEach((entry, i) => {
+            if (i > 1 && i < 8) {
+                let data = {
+                    column: i,
+                    priceValue: price[i],
+                    rsiValue: rsi[i],
+                    priceSpike: spike(price[i+1], price[i], price[i-1]),
+                    rsiSpike: spike(rsi[i+1], rsi[i], rsi[i-1]),
+                };
+                column.push(data)
+            }
         });
+        if (
+            column[2].priceSpike == 'up' &&
+            column[4].priceSpike == 'up' &&
+            column[2].rsiSpike == 'up' &&
+            column[4].rsiSpike == 'up' &&
+            column[4].priceValue < column[2].priceValue &&
+            column[4].rsiValue > column[2].rsiValue
+        ) {
+            resolve({
+                divergence: true,
+                period: 2,
+                direction: 'bearish',
+                pair: pair,
+                timeFrame: timeFrame,
+            });
+        } else {
+            resolve({
+                divergence: false,
+            });
+        }
+
     });
 }
 
