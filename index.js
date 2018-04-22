@@ -72,36 +72,40 @@ function getPrice(timeFrame, pair, mode) {
         let url = 'https://api.bitfinex.com/v2';
         request.get(`${url}/candles/trade:${timeFrame}:t${pair}/${mode}`,
         (error, response, data) => {
-            let price = JSON.parse(data);
-            if (!error) {
-                if (mode == 'last') {
-                    let time = moment.utc(price[0]).local().format('HH:mm:ss');
-                    resolve({
-                        open: price[1],
-                        close: price[2],
-                        high: price[3],
-                        low: price[4],
-                        volume: price[5],
-                        time: time,
-                    });
-                };
-                if (mode == 'hist') {
-                    let historicDataArray = [];
-                    price.forEach((item) => {
-                    let time = moment.utc(item[0]).local().format('HH:mm:ss');
-                        historicDataArray.push({
-                            open: item[1],
-                            close: item[2],
-                            high: item[3],
-                            low: item[4],
-                            volume: item[5],
+            if (data) {
+                let price = JSON.parse(data);
+                if (!error) {
+                    if (mode == 'last') {
+                        let time = moment.utc(price[0]).local().format('HH:mm:ss');
+                        resolve({
+                            open: price[1],
+                            close: price[2],
+                            high: price[3],
+                            low: price[4],
+                            volume: price[5],
                             time: time,
                         });
-                    });
-                    resolve(historicDataArray);
-                };
+                    };
+                    if (mode == 'hist') {
+                        let historicDataArray = [];
+                        price.forEach((item) => {
+                        let time = moment.utc(item[0]).local().format('HH:mm:ss');
+                            historicDataArray.push({
+                                open: item[1],
+                                close: item[2],
+                                high: item[3],
+                                low: item[4],
+                                volume: item[5],
+                                time: time,
+                            });
+                        });
+                        resolve(historicDataArray);
+                    };
+                } else {
+                    reject(error);
+                }
             } else {
-                reject(error);
+                console.log('Bitfinex API is unreachable');
             }
         });
     });
