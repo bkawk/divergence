@@ -6,13 +6,14 @@ const log = require('./logger.js');
 
 
 (() => {
-    log.info('Starting');
-    monitorPair('30m', 'EOSUSD');
-    monitorPair('1h', 'EOSUSD');
-    monitorPair('3h', 'EOSUSD');
-    monitorPair('6h', 'EOSUSD');
-    monitorPair('12h', 'EOSUSD');
-    monitorPair('1D', 'EOSUSD');
+    log.info('Divergence Detector Started');
+    let timeFrames = ['30m', '1h', '3h', '6h', '12h', '1D'];
+    let pairs = ['BTCUSD', 'LTCUSD', 'EOSUSD', 'ETHUSD'];
+    timeFrames.forEach((timeFrames, i) => {
+        pairs.forEach((pairs, i) => {
+            monitorPair(timeFrames, pairs);
+        })  
+    })
 })();
 
 /**
@@ -39,7 +40,7 @@ function monitorPair(timeFrame, pair) {
             .catch((error) => {
                 log.error(Error(error));
             });
-        }, 5000);
+        }, 900000);
     });
 }
 
@@ -77,10 +78,6 @@ function detectDivergence(price, rsi, timeFrame, pair) {
         .then((data) => {
             if (data.divergence) {
                 resolve(data);
-            } else {
-                console.log(`No two period divergences detected 
-                for ${data.pair} on ${data.timeFrame}`);
-                // TODO: Check for 3 4 and 5 period
             }
         });
     });
