@@ -3,34 +3,44 @@ const request = require('request');
 const moment = require('moment');
 const RSI = require('technicalindicators').RSI;
 
-let priceArray = [];
-let rsiArray = [];
-
 (() => {
-    console.log('fetching historic data');
-    getPrice('1m', 'BTCUSD', 'hist')
-    .then((historicPriceData) => {
-        priceArray = historicPriceData;
-        setInterval(() => {
-            getPrice('1m', 'BTCUSD', 'last')
-            .then((priceData) => {
-                priceArray.push(priceData);
-                return calculateRSI(priceArray);
-            })
-            .then((data) => {
-                let price = data[0].reverse();
-                let rsi = data[1].reverse();
-                return detectDivergence(price, rsi);
-            })
-            .then((divergence) => {
-                console.log(`Divergence Found: ${divergence}`);
-            })
-            .catch((error) => {
-                console.log(Error(error));
-            });
-        }, 5000);
-    });
+    console.log('Starting');
+    monitorPair('1m', 'EOSUSD');
+    monitorPair('1m', 'BTCUSD');
 })();
+
+/**
+ * monitorPair
+ * @param {object} timeFrame To monitor 
+ * @param {object} pair The pair like BTCUSD
+ */
+function monitorPair(timeFrame, pair) {
+    return new Promise(function(resolve, reject) {
+        getPrice(timeFrame, pair, 'hist')
+        .then((historicPriceData) => {
+            let priceArray = historicPriceData;
+            setInterval(() => {
+                getPrice(timeFrame, pair, 'last')
+                .then((priceData) => {
+                    priceArray.push(priceData);
+                    return calculateRSI(priceArray);
+                })
+                .then((data) => {
+                    let price = data[0].reverse();
+                    let rsi = data[1].reverse();
+                    return detectDivergence(price, rsi, timeFrame, pair);
+                })
+                .then((divergence) => {
+                    console.log(divergence);
+                })
+                .catch((error) => {
+                    console.log(Error(error));
+                });
+
+            }, 5000);
+        });
+    });
+}
 
 /**
  * Detet divegence
@@ -38,11 +48,12 @@ let rsiArray = [];
  * @param {object} rsi The rsi array data
  * @return {boolean} hasa divergence been found true/false
  */
-function detectDivergence(price, rsi) {
+function detectDivergence(price, rsi, timeFrame, pair) {
     return new Promise(function(resolve, reject) {
-        resolve(false);
+        resolve({divergence: false, period: 0, pair: pair, timeFrame: timeFrame});
     });
 }
+
 
 /**
  * calculate RSI
@@ -55,7 +66,7 @@ function calculateRSI(priceArray) {
         priceArray.forEach((entry) => {
             closeArray.push(entry.close);
         });
-        rsiArray = RSI.calculate({values: closeArray, period: 14});
+        let rsiArray = RSI.calculate({values: closeArray, period: 14});
         resolve([closeArray, rsiArray]);
     });
 }
