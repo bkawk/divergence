@@ -74,10 +74,11 @@ function detectDivergence(price, rsi, timeFrame, pair) {
                 column.push(data);
             }
         });
-
+        log.info(`Scanning....`);
+        let periods = [2, 3, 4, 5];
         Promise.all([
-            twoPeriodBear(column, pair, timeFrame),
-            twoPeriodBull(column, pair, timeFrame),
+            divergenceStrategy(column, pair, timeFrame, periods),
+            // reversalStrategy(column, pair, timeFrame, periods),
         ])
         .then(function(res) {
             res.forEach((data) => {
@@ -91,79 +92,56 @@ function detectDivergence(price, rsi, timeFrame, pair) {
         });
     });
 }
-/**
- * Detet two period bullish divergence
- * @param {object} column The array of column data
- * @param {object} pair The pair of column data
- * @param {object} timeFrame The timeframe of column data
- * @return {object} divergence report
- */
-function twoPeriodBull(column, pair, timeFrame) {
-    return new Promise(function(resolve, reject) {
-        if (
-            column[2].priceSpike == 'down' &&
-            column[4].priceSpike == 'down' &&
-            column[2].rsiSpike == 'down' &&
-            column[4].rsiSpike == 'down' &&
-            column[4].priceValue > column[2].priceValue &&
-            column[4].rsiValue < column[2].rsiValue
-        ) {
-            resolve({
-                divergence: true,
-                period: 2,
-                direction: 'bullish',
-                pair: pair,
-                timeFrame: timeFrame,
-                column: column,
-            });
-        } else {
-            resolve({
-                divergence: false,
-                period: 2,
-                direction: 'bullish',
-                pair: pair,
-                timeFrame: timeFrame,
-                column: column,
-            });
-        }
-    });
-}
 
 /**
- * Detet two period bearish divergence
+ * Divergence Strategy
  * @param {object} column The array of column data
  * @param {object} pair The pair of column data
  * @param {object} timeFrame The timeframe of column data
+ * @param {object} period The period between spikes
  * @return {object} divergence report
  */
-function twoPeriodBear(column, pair, timeFrame) {
+function divergenceStrategy(column, pair, timeFrame, period) {
     return new Promise(function(resolve, reject) {
-        if (
-            column[2].priceSpike == 'up' &&
-            column[4].priceSpike == 'up' &&
-            column[2].rsiSpike == 'up' &&
-            column[4].rsiSpike == 'up' &&
-            column[4].priceValue < column[2].priceValue &&
-            column[4].rsiValue > column[2].rsiValue
-        ) {
-            resolve({
-                divergence: true,
-                period: 2,
-                direction: 'bearish',
-                pair: pair,
-                timeFrame: timeFrame,
-                column: column,
-            });
-        } else {
-            resolve({
-                divergence: false,
-                period: 2,
-                direction: 'bearish',
-                pair: pair,
-                timeFrame: timeFrame,
-                column: column,
-            });
-        }
+        period.forEach((data) => {
+            let i = data + 2;
+            if (
+                column[2].priceSpike == 'up' &&
+                column[i].priceSpike == 'up' &&
+                column[2].rsiSpike == 'up' &&
+                column[i].rsiSpike == 'up' &&
+                column[i].priceValue < column[2].priceValue &&
+                column[i].rsiValue > column[2].rsiValue
+            ) {
+                log.info(`${pair} - ${timeFrame} - Pass`);
+                resolve({
+                    divergence: true,
+                    period: data,
+                    direction: 'bearish',
+                    pair: pair,
+                    timeFrame: timeFrame,
+                    column: column,
+                });
+            }
+            if (
+                column[2].priceSpike == 'down' &&
+                column[i].priceSpike == 'down' &&
+                column[2].rsiSpike == 'down' &&
+                column[i].rsiSpike == 'down' &&
+                column[i].priceValue > column[2].priceValue &&
+                column[i].rsiValue < column[2].rsiValue
+            ) {
+                log.info(`${pair} - ${timeFrame} - Pass`);
+                resolve({
+                    divergence: true,
+                    period: data,
+                    direction: 'bullish',
+                    pair: pair,
+                    timeFrame: timeFrame,
+                    column: column,
+                });
+            }
+        });
     });
 }
 
@@ -219,40 +197,34 @@ return new Promise(function(resolve, reject) {
         url: `${url}/candles/trade:${timeFrame}:t${pair}/${mode}`,
         method: 'get',
     }, function(error, response) {
-        if (response && response.body) {
+        if (response && response.body != 'null') {
             let price = JSON.parse(response.body);
-            if (!error && price && price.length >= 0 && price[0] != 'error') {
-                if (mode == 'last') {
-                    let time = moment.unix(price[0]).local().format('HH:mm');
-                    resolve({
-                        open: price[1],
-                        close: price[2],
-                        high: price[3],
-                        low: price[4],
-                        volume: price[5],
+            if (mode == 'last') {
+                let time = moment.unix(price[0]).local().format('HH:mm');
+                resolve({
+                    open: price[1],
+                    close: price[2],
+                    high: price[3],
+                    low: price[4],
+                    volume: price[5],
+                    time: time,
+                });
+            };
+            if (mode == 'hist') {
+                let historicDataArray = [];
+                price.forEach((item) => {
+                let time = moment.unix(item[0]).local().format('HH:mm');
+                    historicDataArray.push({
+                        open: item[1],
+                        close: item[2],
+                        high: item[3],
+                        low: item[4],
+                        volume: item[5],
                         time: time,
                     });
-                };
-                if (mode == 'hist') {
-                    let historicDataArray = [];
-                    price.forEach((item) => {
-                    let time = moment.unix(item[0]).local().format('HH:mm:ss');
-                        historicDataArray.push({
-                            open: item[1],
-                            close: item[2],
-                            high: item[3],
-                            low: item[4],
-                            volume: item[5],
-                            time: time,
-                        });
-                    });
-                    resolve(historicDataArray);
-                };
-            } else {
-                reject('Bitfinex rate limit error');
-            }
-        } else {
-            log.warn('Bitfinex API is unreachable');
+                });
+                resolve(historicDataArray);
+            };
         }
     });
 });
