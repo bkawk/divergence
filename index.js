@@ -1,20 +1,49 @@
 'use strict';
 const RateLimiter = require('request-rate-limiter');
+const winston = require('winston');
+const fs = require('fs');
 const moment = require('moment');
 const RSI = require('@solazu/technicalindicators').RSI;
-const log = require('./logger.js');
+
+
+/**
+ * Rate limiter to ensure we dont hit rate limits from the BitFinex API
+ */
 const limiter = new RateLimiter({
     rate: 1,
     interval: 6,
 });
 
 
+/**
+ * Logger to be used to log all found divergences to a file
+ */
+const log = new (winston.Logger)({
+    transports: [
+        new (winston.transports.Console)({ 
+            colorize: true,
+            timestamp() {return moment().format('dddd, MMMM Do YYYY, h:mm:ss a');},
+            level: process.env.NODE_ENV === 'development' ? 'debug' : 'info'
+        }),
+        new (winston.transports.File)({
+            filename: `logs.log`,
+            timestamp() {return moment().format('dddd, MMMM Do YYYY, h:mm:ss a');},
+            level: process.env.NODE_ENV === 'development' ? 'debug' : 'info'
+        })
+    ]
+});
+
+/**
+ * Launcher
+ * Allows the time frames and the pairs to be entered.
+ * Starts the monitorPair function for each pair / time frame combination.
+ */
 (() => {
     log.info('Divergence Detector Started');
     let timeFrames = ['30m', '1h', '2h', '3h', '4h'];
     let pairs = ['EOSUSD', 'BTCUSD', 'ETHUSD', 'LTCUSD'];
-    timeFrames.forEach((timeFrames, i) => {
-        pairs.forEach((pairs, i) => {
+    timeFrames.forEach((timeFrames) => {
+        pairs.forEach((pairs) => {
             monitorPair(timeFrames, pairs);
         });
     });
@@ -22,6 +51,9 @@ const limiter = new RateLimiter({
 
 /**
  * monitorPair
+ * gets the historic data then starts requesting the live data and stores in priceArray
+ * usees the historic and live data to calculate the RSI this returns two arrays one for the price and one for the rsi 
+ * The two arrays are then given to the detectDivergence function to determine of any divegences occour on any of the timeframes for any pair.
  * @param {object} timeFrame To monitor
  * @param {object} pair The pair like BTCUSD
  */
@@ -52,12 +84,32 @@ function monitorPair(timeFrame, pair) {
 }
 
 /**
- * Detet divegence
+ * Spike Detector
+ * Part of being able to detect a divergence is to know where the numbers spike
+ * A spike is where the numbers before and after the terget are both higher or lower than the target
+ * @param {number} left The value to the left of target
+ * @param {number} head The tagets value
+ * @param {number} right The value to the right of target
+ * @return {string} the string indicating direction
+ */
+function spike(left, target, right) {
+    if (target > left && target > right) {
+        return 'up';
+    } else if (target < left && target < right) {
+        return 'down';
+    } else {
+        return 'none';
+    }
+}
+
+/**
+ * Detet Divegence
+ * First stage of finding a divergence by preparing the column array
  * @param {object} price The price array data
  * @param {object} rsi The rsi array data
  * @param {object} timeFrame The timeframe
  * @param {object} pair The pair
- * @return {boolean} hasa divergence been found true/false
+ * @return {boolean} has a divergence been found true/false
  */
 function detectDivergence(price, rsi, timeFrame, pair) {
     return new Promise(function(resolve, reject) {
@@ -78,7 +130,7 @@ function detectDivergence(price, rsi, timeFrame, pair) {
         let periods = [2, 3, 4, 5];
         Promise.all([
             divergenceStrategy(column, pair, timeFrame, periods),
-            // reversalStrategy(column, pair, timeFrame, periods),
+            // TODO: reversalStrategy(column, pair, timeFrame, periods),
         ])
         .then(function(res) {
             res.forEach((data) => {
@@ -95,6 +147,7 @@ function detectDivergence(price, rsi, timeFrame, pair) {
 
 /**
  * Divergence Strategy
+ * For each of the items in the column array we look for divergence
  * @param {object} column The array of column data
  * @param {object} pair The pair of column data
  * @param {object} timeFrame The timeframe of column data
@@ -145,25 +198,11 @@ function divergenceStrategy(column, pair, timeFrame, period) {
     });
 }
 
-/**
- * spike detector
- * @param {number} left The value to the left of target
- * @param {number} head The tagets value
- * @param {number} right The value to the right of target
- * @return {string} the string indicating direction
- */
-function spike(left, head, right) {
-    if (head > left && head > right) {
-        return 'up';
-    } else if (head < left && head < right) {
-        return 'down';
-    } else {
-        return 'none';
-    }
-}
+
 
 /**
- * calculate RSI
+ * Calculate RSI
+ * From the historic and live data, calculate the RSI and return the last 9 as 2 arrays
  * @param {object} priceArray The proce data
  * @return {object} the RSI Array
  */
@@ -185,6 +224,7 @@ function calculateRSI(priceArray) {
 
 /**
  * Request price data from Bitfinex
+ * Used to request historic and live data from the bitfinex API
  * @param {string} timeFrame The time frame to request.
  * @param {string} pair The pair to request like BTCUSD
  * @param {string} mode last or hist
