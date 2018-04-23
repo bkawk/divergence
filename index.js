@@ -1,5 +1,7 @@
 'use strict';
 const request = require('request');
+const RateLimiter = require('request-rate-limiter');
+const limiter = new RateLimiter();
 const moment = require('moment');
 const RSI = require('@solazu/technicalindicators').RSI;
 const log = require('./logger.js');
@@ -7,8 +9,8 @@ const log = require('./logger.js');
 
 (() => {
     log.info('Divergence Detector Started');
-    let timeFrames = ['30m', '1h', '3h', '6h', '12h', '1D'];
-    let pairs = ['BTCUSD', 'LTCUSD', 'EOSUSD', 'ETHUSD'];
+    let timeFrames = ['30m', '1h', '3h', '6h'];
+    let pairs = ['EOSUSD', 'BTCUSD', 'ETHUSD', 'LTCUSD'];
     timeFrames.forEach((timeFrames, i) => {
         pairs.forEach((pairs, i) => {
             monitorPair(timeFrames, pairs);
@@ -40,7 +42,10 @@ function monitorPair(timeFrame, pair) {
             .catch((error) => {
                 log.error(Error(error));
             });
-        }, 900000);
+        }, 60000);
+    })            
+    .catch((error) => {
+        log.error(error);
     });
 }
 
@@ -67,6 +72,7 @@ function detectDivergence(price, rsi, timeFrame, pair) {
                 column.push(data);
             }
         });
+        // TODO: Make sure the below isnt called till column array is complete
         twoPeriodBear(column, pair, timeFrame)
         .then((data) => {
             if (data.divergence) {
@@ -79,6 +85,9 @@ function detectDivergence(price, rsi, timeFrame, pair) {
             if (data.divergence) {
                 resolve(data);
             }
+        })
+        .catch((error) => {
+            log.debug(error);
         });
     });
 }
@@ -202,11 +211,15 @@ function calculateRSI(priceArray) {
 function getPrice(timeFrame, pair, mode) {
 return new Promise(function(resolve, reject) {
     let url = 'https://api.bitfinex.com/v2';
-    request.get(`${url}/candles/trade:${timeFrame}:t${pair}/${mode}`,
-    (error, response, data) => {
+    limiter.request({
+        url: `${url}/candles/trade:${timeFrame}:t${pair}/${mode}`,
+        method: 'get'
+    }, function(error, response) {
+    let data = response.body;
         if (data) {
             let price = JSON.parse(data);
-            if (!error) {
+            if (!error && price.length >= 0 && price[0] != 'error') {
+                
                 if (mode == 'last') {
                     let time = moment.unix(price[0]).local().format('HH:mm');
                     resolve({
@@ -234,7 +247,7 @@ return new Promise(function(resolve, reject) {
                     resolve(historicDataArray);
                 };
             } else {
-                reject(error);
+                reject('Bitfinex rate limit error');
             }
         } else {
             log.warn('Bitfinex API is unreachable');
