@@ -1,10 +1,12 @@
 'use strict';
-const request = require('request');
 const RateLimiter = require('request-rate-limiter');
-const limiter = new RateLimiter(10);
 const moment = require('moment');
 const RSI = require('@solazu/technicalindicators').RSI;
 const log = require('./logger.js');
+const limiter = new RateLimiter({
+    rate: 1,
+    interval: 6,
+});
 
 
 (() => {
@@ -14,8 +16,8 @@ const log = require('./logger.js');
     timeFrames.forEach((timeFrames, i) => {
         pairs.forEach((pairs, i) => {
             monitorPair(timeFrames, pairs);
-        })  
-    })
+        });
+    });
 })();
 
 /**
@@ -43,7 +45,7 @@ function monitorPair(timeFrame, pair) {
                 log.error(Error(error));
             });
         }, 120000);
-    })            
+    })
     .catch((error) => {
         log.error(error);
     });
@@ -73,23 +75,20 @@ function detectDivergence(price, rsi, timeFrame, pair) {
             }
         });
 
-        twoPeriodBear(column, pair, timeFrame)
-        .then((data) => {
-            if (data.divergence) {
-                resolve(data);
-            } else {
-                return twoPeriodBull(column, pair, timeFrame);
-            }
+        Promise.all([
+            twoPeriodBear(column, pair, timeFrame),
+            twoPeriodBull(column, pair, timeFrame),
+        ])
+        .then(function(res) {
+            res.forEach((data) => {
+                if (data.divergence) {
+                    resolve(data);
+                };
+            });
         })
-        .then((data) => {
-            if (data.divergence) {
-                resolve(data);
-            }
-        })
-        .catch((error) => {
-            log.debug(error);
+        .catch(function(err) {
+            console.error('Promise.all error', err);
         });
-
     });
 }
 /**
@@ -218,9 +217,8 @@ return new Promise(function(resolve, reject) {
     let url = 'https://api.bitfinex.com/v2';
     limiter.request({
         url: `${url}/candles/trade:${timeFrame}:t${pair}/${mode}`,
-        method: 'get'
+        method: 'get',
     }, function(error, response) {
-        console.log('------request')
         if (response && response.body) {
             let price = JSON.parse(response.body);
             if (!error && price && price.length >= 0 && price[0] != 'error') {
