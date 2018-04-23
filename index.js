@@ -1,7 +1,7 @@
 'use strict';
 const request = require('request');
 const RateLimiter = require('request-rate-limiter');
-const limiter = new RateLimiter();
+const limiter = new RateLimiter(10);
 const moment = require('moment');
 const RSI = require('@solazu/technicalindicators').RSI;
 const log = require('./logger.js');
@@ -9,7 +9,7 @@ const log = require('./logger.js');
 
 (() => {
     log.info('Divergence Detector Started');
-    let timeFrames = ['30m', '1h', '3h', '6h'];
+    let timeFrames = ['30m', '1h', '2h', '3h', '4h'];
     let pairs = ['EOSUSD', 'BTCUSD', 'ETHUSD', 'LTCUSD'];
     timeFrames.forEach((timeFrames, i) => {
         pairs.forEach((pairs, i) => {
@@ -42,7 +42,7 @@ function monitorPair(timeFrame, pair) {
             .catch((error) => {
                 log.error(Error(error));
             });
-        }, 60000);
+        }, 120000);
     })            
     .catch((error) => {
         log.error(error);
@@ -72,7 +72,7 @@ function detectDivergence(price, rsi, timeFrame, pair) {
                 column.push(data);
             }
         });
-        // TODO: Make sure the below isnt called till column array is complete
+
         twoPeriodBear(column, pair, timeFrame)
         .then((data) => {
             if (data.divergence) {
@@ -89,6 +89,7 @@ function detectDivergence(price, rsi, timeFrame, pair) {
         .catch((error) => {
             log.debug(error);
         });
+
     });
 }
 /**
@@ -114,6 +115,7 @@ function twoPeriodBull(column, pair, timeFrame) {
                 direction: 'bullish',
                 pair: pair,
                 timeFrame: timeFrame,
+                column: column,
             });
         } else {
             resolve({
@@ -122,6 +124,7 @@ function twoPeriodBull(column, pair, timeFrame) {
                 direction: 'bullish',
                 pair: pair,
                 timeFrame: timeFrame,
+                column: column,
             });
         }
     });
@@ -150,6 +153,7 @@ function twoPeriodBear(column, pair, timeFrame) {
                 direction: 'bearish',
                 pair: pair,
                 timeFrame: timeFrame,
+                column: column,
             });
         } else {
             resolve({
@@ -158,6 +162,7 @@ function twoPeriodBear(column, pair, timeFrame) {
                 direction: 'bearish',
                 pair: pair,
                 timeFrame: timeFrame,
+                column: column,
             });
         }
     });
@@ -215,11 +220,10 @@ return new Promise(function(resolve, reject) {
         url: `${url}/candles/trade:${timeFrame}:t${pair}/${mode}`,
         method: 'get'
     }, function(error, response) {
-    let data = response.body;
-        if (data) {
-            let price = JSON.parse(data);
-            if (!error && price.length >= 0 && price[0] != 'error') {
-                
+        console.log('------request')
+        if (response && response.body) {
+            let price = JSON.parse(response.body);
+            if (!error && price && price.length >= 0 && price[0] != 'error') {
                 if (mode == 'last') {
                     let time = moment.unix(price[0]).local().format('HH:mm');
                     resolve({
