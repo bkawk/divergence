@@ -4,7 +4,6 @@ const winston = require('winston');
 const fs = require('fs');
 const moment = require('moment');
 const RSI = require('@solazu/technicalindicators').RSI;
-const isJSON = require('is-json');
 
 
 /**
@@ -238,7 +237,7 @@ return new Promise(function(resolve, reject) {
         url: `${url}/candles/trade:${timeFrame}:t${pair}/${mode}`,
         method: 'get',
     }, function (error, response) {
-        if (response && response.body != 'null' && isJSON(response.body)) {
+        if (response && response.body != 'null' && response.body.startsWith('[')) {
             let price = JSON.parse(response.body);
             if (mode == 'last') {
                 let time = moment.unix(price[0]).local().format('HH:mm');
