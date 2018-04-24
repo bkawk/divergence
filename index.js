@@ -4,6 +4,7 @@ const winston = require('winston');
 const fs = require('fs');
 const moment = require('moment');
 const RSI = require('@solazu/technicalindicators').RSI;
+const isJSON = require('is-json');
 
 
 /**
@@ -115,7 +116,7 @@ function detectDivergence(price, rsi, timeFrame, pair) {
     return new Promise(function(resolve, reject) {
         let column = [];
         price.forEach((entry, i) => {
-            if (i > 1 && i < 8) {
+            if (i > 0 && i < 9) {
                 let data = {
                     column: i,
                     priceValue: price[i],
@@ -157,7 +158,7 @@ function detectDivergence(price, rsi, timeFrame, pair) {
 function divergenceStrategy(column, pair, timeFrame, period) {
     return new Promise(function(resolve, reject) {
         period.forEach((data) => {
-            let i = data + 2;
+            let i = data + 2; 
             if (
                 column[2].priceSpike == 'up' &&
                 column[i].priceSpike == 'up' &&
@@ -236,8 +237,8 @@ return new Promise(function(resolve, reject) {
     limiter.request({
         url: `${url}/candles/trade:${timeFrame}:t${pair}/${mode}`,
         method: 'get',
-    }, function(error, response) {
-        if (response && response.body != 'null') {
+    }, function (error, response) {
+        if (response && response.body != 'null' && isJSON(response.body)) {
             let price = JSON.parse(response.body);
             if (mode == 'last') {
                 let time = moment.unix(price[0]).local().format('HH:mm');

@@ -20,6 +20,7 @@
   "homepage": "https://github.com/bkawk/divergence#readme",
   "dependencies": {
     "@solazu/technicalindicators": "^2.0.8",
+    "is-json": "^2.0.1",
     "moment": "^2.22.1",
     "request": "^2.85.0",
     "request-rate-limiter": "^1.0.2",
