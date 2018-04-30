@@ -1,87 +1,195 @@
 'use strict';
-const RateLimiter = require('request-rate-limiter');
-const winston = require('winston');
 const fs = require('fs');
 const moment = require('moment');
 const RSI = require('@solazu/technicalindicators').RSI;
+const ws = require('ws')
+const errorLog = require('./import/logger').errorlog;
+const successLog = require('./import/logger').successlog;
 
+let bitfinexData = [];
+let bitfinexSubscriptions = [];
+
+successLog.info(`Divergence Detector Started`);
 
 /**
- * Rate limiter to ensure we dont hit rate limits from the BitFinex API
- */
-const limiter = new RateLimiter({
-    rate: 1,
-    interval: 6,
+* Start
+*/
+createBitfinexSubscriptions()
+.then(() => {
+    return getBitfinexData();
+})
+.then(() => {
+    let waitingForHour = 0;
+    setInterval(() => {
+        if(waitingForHour == 0){
+            successLog.info(`Waiting for the top of the hour before scanning`);
+            waitingForHour = 1;
+        }
+        var minutes = new Date().getMinutes();
+        var seconds = new Date().getSeconds();
+        // if (minutes == 34 && seconds == 0){
+            successLog.info(`Top of the hour is now`);
+            scanData();
+        // }
+    }, 1000);
+})
+.catch((error) => {
+    errorLog.error(`Error Message : ${error}`);
 });
 
 
 /**
- * Logger to be used to log all found divergences to a file
+ * Get Bitfinex Data
  */
-const log = new (winston.Logger)({
-    transports: [
-        new (winston.transports.Console)({ 
-            colorize: true,
-            timestamp() {return moment().format('dddd, MMMM Do YYYY, h:mm:ss a');},
-            level: process.env.NODE_ENV === 'development' ? 'debug' : 'info'
-        }),
-        new (winston.transports.File)({
-            filename: `logs.log`,
-            timestamp() {return moment().format('dddd, MMMM Do YYYY, h:mm:ss a');},
-            level: process.env.NODE_ENV === 'development' ? 'debug' : 'info'
-        })
-    ]
-});
+function createBitfinexSubscriptions(){
+    return new Promise(function(resolve, reject) {
+        let timeFrames = ['1m', '30m', '1h'];
+        let pairs = [
+            'EOSUSD',
+            'ZRXUSD',
+            'AIDUSD',
+            'AIOUSD',
+            'REPUSD',
+            'AVTUSD',
+            'BATUSD',
+            'BTCUSD',
+            'BCHUSD',
+            'BTGUSD',
+            'BFTUSD',
+            'CFIUSD',
+            'DAIUSD',
+            'DASHUSD',
+            'MNAUSD',
+            'ETPUSD',
+            'EDUUSD',
+            'ETHUSD',
+            'EDOUSD',
+            'ETCUSD',
+            'FUNUSD',
+            'GNTUSD',
+            'IOSUSD',
+            'IOTAUSD',
+            'LTCUSD',
+            'LRCUSD',
+            'MTNUSD',
+            'XMRUSD',
+            'NEOUSD',
+            'ODEUSD',
+            'OMGUSD',
+            'QASHUSD',
+            'QTUMUSD',
+            'RCNUSD',
+            'RDNUSD',
+            'RRTUSD',
+            'REQUSD',
+            'XRPUSD',
+            'SANUSD',
+            'SNGUSD',
+            'AGIUSD',
+            'SPKUSD',
+            'SNTUSD',
+            'DATAUSD',
+            'TRXUSD',
+            'TNBUSD',
+            'WAXUSD',
+            'YYWUSD',
+            'ZECUSD',
+            'ELFUSD',
+            'RLCUSD',
+        ];
 
-/**
- * Launcher
- * Allows the time frames and the pairs to be entered.
- * Starts the monitorPair function for each pair / time frame combination.
- */
-(() => {
-    log.info('Divergence Detector Started');
-    let timeFrames = ['30m', '1h', '2h', '3h', '4h'];
-    let pairs = ['EOSUSD', 'BTCUSD', 'ETHUSD', 'LTCUSD'];
-    timeFrames.forEach((timeFrames) => {
-        pairs.forEach((pairs) => {
-            monitorPair(timeFrames, pairs);
+        timeFrames.forEach((timeFrames) => {
+            pairs.forEach((pairs) => {
+                bitfinexSubscriptions.push({event: 'subscribe', channel: 'candles', key: `trade:${timeFrames}:t${pairs}`})
+            });
         });
-    });
-})();
+        resolve();
+    })
+}
 
 /**
- * monitorPair
- * gets the historic data then starts requesting the live data and stores in priceArray
- * usees the historic and live data to calculate the RSI this returns two arrays one for the price and one for the rsi 
- * The two arrays are then given to the detectDivergence function to determine of any divegences occour on any of the timeframes for any pair.
- * @param {object} timeFrame To monitor
- * @param {object} pair The pair like BTCUSD
+ * Get Bitfinex Data
  */
-function monitorPair(timeFrame, pair) {
-    getPrice(timeFrame, pair, 'hist')
-    .then((historicPriceData) => {
-        let priceArray = historicPriceData;
-        setInterval(() => {
-            getPrice(timeFrame, pair, 'last')
-            .then((priceData) => {
-                priceArray.push(priceData);
-                return calculateRSI(priceArray);
+function getBitfinexData() {
+    return new Promise(function(resolve, reject) {
+        let initialDataComplete = 0;
+        const w = new ws('wss://api.bitfinex.com/ws/2')
+        w.on('message', (msg) => {
+            let data = JSON.parse(msg);
+            if (data.event == "subscribed" && data.channel == "candles") {
+                let key = data.key.split(":");
+                bitfinexData.push({pair: key[2], timeFrame: key[1], chanId: data.chanId, data: []});
+            } else if (data[0] != undefined && data[1] != 'hb') {
+                let chanId = data[0];
+                let price = data[1];
+                let time = moment.unix(price[0]).local().format('HH:mm');
+                var pair = bitfinexData.filter((obj) => {
+                    return obj.chanId === chanId;
+                });
+                let pairData = pair[0].data;
+                if (price.length > 6) {
+                    price.forEach((price)=>{
+                        let time = moment.unix(price[0]).local().format('HH:mm');
+                        pairData.push({
+                            open: price[1],
+                            close: price[2],
+                            high: price[3],
+                            low: price[4],
+                            volume: price[5],
+                            time: time,
+                        });
+                    }) 
+                } else {
+                    pairData.push({
+                        open: price[1],
+                        close: price[2],
+                        high: price[3],
+                        low: price[4],
+                        volume: price[5],
+                        time: time,
+                    });
+                }
+                if (pairData.length >= 150) {
+                    pairData.shift();
+                }
+                if(bitfinexData.length == bitfinexSubscriptions.length && initialDataComplete == 0){
+                    initialDataComplete = 1;
+                    successLog.info(`Initial Bitfinex data complete`);
+                    successLog.info(`Listening for more data on websockets`);
+                    resolve();
+                }
+            }
+        })
+        w.on('open', () => {
+            bitfinexSubscriptions.forEach((pairs, i) => {
+                w.send(JSON.stringify(bitfinexSubscriptions[i]))
             })
-            .then((data) => {
-                return detectDivergence(data[0], data[1], timeFrame, pair);
+        })
+    })
+}
+
+/**
+ * start scanner
+ */
+function scanData() {
+    return new Promise(function(resolve, reject) {
+        successLog.info(`Scanning Data now`);
+        let dataArray = bitfinexData;
+        dataArray.forEach((results)=>{
+            calculateRSI(results.data)
+            .then((rsiAndPrice) => {
+                return createColumns(rsiAndPrice[0], rsiAndPrice[1], results.timeFrame, results.pair);
             })
             .then((divergence) => {
-                log.info(divergence);
+                successLog.info(divergence);
             })
             .catch((error) => {
-                log.error(Error(error));
+                errorLog.error(`Error Message : ${error}`);
             });
-        }, 120000);
+        })
     })
-    .catch((error) => {
-        log.error(error);
-    });
 }
+
 
 /**
  * Spike Detector
@@ -93,12 +201,16 @@ function monitorPair(timeFrame, pair) {
  * @return {string} the string indicating direction
  */
 function spike(left, target, right) {
-    if (target > left && target > right) {
-        return 'up';
-    } else if (target < left && target < right) {
-        return 'down';
+    if (typeof left === "number" && typeof target === "number" && typeof right === "number") {
+        if (target > left && target > right) {
+            return 'up';
+        } else if (target < left && target < right) {
+            return 'down';
+        } else {
+            return 'none';
+        }
     } else {
-        return 'none';
+        console.log('Spike Error')
     }
 }
 
@@ -111,11 +223,12 @@ function spike(left, target, right) {
  * @param {object} pair The pair
  * @return {boolean} has a divergence been found true/false
  */
-function detectDivergence(price, rsi, timeFrame, pair) {
+function createColumns(price, rsi, timeFrame, pair) {
     return new Promise(function(resolve, reject) {
         let column = [];
         price.forEach((entry, i) => {
-            if (i > 0 && i < 9) {
+            if (price && i > 0 && i < 18) {
+                // TODO: Mathias to not hard code this
                 let data = {
                     column: i,
                     priceValue: price[i],
@@ -126,22 +239,25 @@ function detectDivergence(price, rsi, timeFrame, pair) {
                 column.push(data);
             }
         });
-        log.info(`Scanning....`);
-        let periods = [2, 3, 4, 5];
-        Promise.all([
-            divergenceStrategy(column, pair, timeFrame, periods),
-            // TODO: reversalStrategy(column, pair, timeFrame, periods),
-        ])
-        .then(function(res) {
-            res.forEach((data) => {
-                if (data.divergence) {
-                    resolve(data);
-                };
+
+        let periods = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+        // TODO: Find out why the column array is sometimes empty
+        if (column.length > 1){
+            Promise.all([
+                divergenceStrategy(column, pair, timeFrame, periods),
+                // TODO: reversalStrategy(column, pair, timeFrame, periods),
+            ])
+            .then(function(res) {
+                res.forEach((data) => {
+                    if (data.divergence) {
+                        resolve(data);
+                    };
+                });
+            })
+            .catch(function(err) {
+                console.error('Promise.all error', err);
             });
-        })
-        .catch(function(err) {
-            console.error('Promise.all error', err);
-        });
+        }
     });
 }
 
@@ -158,41 +274,52 @@ function divergenceStrategy(column, pair, timeFrame, period) {
     return new Promise(function(resolve, reject) {
         period.forEach((data) => {
             let i = data + 2; 
-            if (
-                column[2].priceSpike == 'up' &&
-                column[i].priceSpike == 'up' &&
-                column[2].rsiSpike == 'up' &&
-                column[i].rsiSpike == 'up' &&
-                column[i].priceValue < column[2].priceValue &&
-                column[i].rsiValue > column[2].rsiValue
-            ) {
-                log.info(`${pair} - ${timeFrame} - Pass`);
-                resolve({
-                    divergence: true,
-                    period: data,
-                    direction: 'bearish',
-                    pair: pair,
-                    timeFrame: timeFrame,
-                    column: column,
-                });
+            // if (typeof column[i]["priceSpike"] === "undifined"){
+            //     return
+            // }
+            if (typeof column[i].priceSpike !== 'undefined') {
+                if (
+                    column[2].priceSpike == 'up' &&
+                    column[i].priceSpike == 'up' &&
+                    column[2].rsiSpike == 'up' &&
+                    column[i].rsiSpike == 'up' &&
+                    column[i].priceValue < column[2].priceValue &&
+                    column[i].rsiValue > column[2].rsiValue
+                ) {
+                    successLog.info(`{pair:${pair}, timeFrame:${timeFrame}, period:${data}, direction:'bearish', column:${JSON.stringify(column)}}`);
+                    resolve({
+                        divergence: true,
+                        period: data,
+                        direction: 'bearish',
+                        pair: pair,
+                        timeFrame: timeFrame,
+                        column: column,
+                    });
+                }
+            } else {
+                console.log('Possible Rate Limit')
             }
-            if (
-                column[2].priceSpike == 'down' &&
-                column[i].priceSpike == 'down' &&
-                column[2].rsiSpike == 'down' &&
-                column[i].rsiSpike == 'down' &&
-                column[i].priceValue > column[2].priceValue &&
-                column[i].rsiValue < column[2].rsiValue
-            ) {
-                log.info(`${pair} - ${timeFrame} - Pass`);
-                resolve({
-                    divergence: true,
-                    period: data,
-                    direction: 'bullish',
-                    pair: pair,
-                    timeFrame: timeFrame,
-                    column: column,
-                });
+            if ( typeof column[i].priceSpike !== 'undefined') {
+                if (
+                    column[2].priceSpike == 'down' &&
+                    column[i].priceSpike == 'down' &&
+                    column[2].rsiSpike == 'down' &&
+                    column[i].rsiSpike == 'down' &&
+                    column[i].priceValue > column[2].priceValue &&
+                    column[i].rsiValue < column[2].rsiValue
+                ) {
+                    successLog.info(`{pair:${pair}, timeFrame:${timeFrame}, period:${data}, direction:'bullish', column:${JSON.stringify(column)}}`);
+                    resolve({
+                        divergence: true,
+                        period: data,
+                        direction: 'bullish',
+                        pair: pair,
+                        timeFrame: timeFrame,
+                        column: column,
+                    });
+                }
+            } else {
+                console.log('Possible Rate Limit')
             }
         });
     });
@@ -218,54 +345,6 @@ function calculateRSI(priceArray) {
             reversedInput: true,
         };
         let rsiArray = (RSI.calculate(inputRSI));
-        resolve([closeArray.slice(0, 9), rsiArray.slice(0, 9)]);
+        resolve([closeArray.slice(0, 20), rsiArray.slice(0, 20)]);
     });
-}
-
-/**
- * Request price data from Bitfinex
- * Used to request historic and live data from the bitfinex API
- * @param {string} timeFrame The time frame to request.
- * @param {string} pair The pair to request like BTCUSD
- * @param {string} mode last or hist
- * @return {object} the price data
- */
-function getPrice(timeFrame, pair, mode) {
-return new Promise(function(resolve, reject) {
-    let url = 'https://api.bitfinex.com/v2';
-    limiter.request({
-        url: `${url}/candles/trade:${timeFrame}:t${pair}/${mode}`,
-        method: 'get',
-    }, function (error, response) {
-        if (response && response.body != 'null' && response.body.startsWith('[')) {
-            let price = JSON.parse(response.body);
-            if (mode == 'last') {
-                let time = moment.unix(price[0]).local().format('HH:mm');
-                resolve({
-                    open: price[1],
-                    close: price[2],
-                    high: price[3],
-                    low: price[4],
-                    volume: price[5],
-                    time: time,
-                });
-            };
-            if (mode == 'hist') {
-                let historicDataArray = [];
-                price.forEach((item) => {
-                let time = moment.unix(item[0]).local().format('HH:mm');
-                    historicDataArray.push({
-                        open: item[1],
-                        close: item[2],
-                        high: item[3],
-                        low: item[4],
-                        volume: item[5],
-                        time: time,
-                    });
-                });
-                resolve(historicDataArray);
-            };
-        }
-    });
-});
 }
