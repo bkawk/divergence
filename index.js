@@ -214,12 +214,8 @@ function scanData() {
             .then((divergence) => {
                 saveData(
                     'divergence',
-                    `{pair:${divergence.pair},
-                        timeFrame:${divergence.timeFrame},
-                        period:${divergence.data},
-                        direction:${divergence.direction},
-                        column:${JSON.stringify(divergence.column)}}`
-                    );
+                    `{"pair": ${JSON.stringify(divergence.pair)}, "timeFrame": ${JSON.stringify(divergence.timeFrame)}, "period": ${divergence.period}, "direction": ${JSON.stringify(divergence.direction)}, "column": ${JSON.stringify(divergence.data)}},`
+                );
             })
             .catch((error) => {
                 console.log(error);
@@ -360,9 +356,9 @@ function divergenceStrategy(column, pair, timeFrame, period) {
                         divergence: true,
                         period: data,
                         direction: 'bearish',
-                        pair,
-                        timeFrame,
-                        column,
+                        pair: pair,
+                        timeFrame: timeFrame,
+                        data: column,
                     });
                 }
                 if (
@@ -378,9 +374,9 @@ function divergenceStrategy(column, pair, timeFrame, period) {
                         divergence: true,
                         period: data,
                         direction: 'bullish',
-                        pair,
-                        timeFrame,
-                        column,
+                        pair: pair,
+                        timeFrame: timeFrame,
+                        data: column,
                     });
                 }
         });
@@ -435,6 +431,6 @@ function calculateRSI(priceArray) {
  */
 function saveData(name, data) {
         let logFile = fs.createWriteStream(
-            __dirname + `/${name}.log`, {flags: 'a'});
+            __dirname + `/${name}.js`, {flags: 'a'});
         logFile.write(util.format(data) + '\n');
 }
