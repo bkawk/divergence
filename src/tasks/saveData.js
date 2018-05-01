@@ -13,6 +13,6 @@ module.exports = function saveData(name, data) {
         fs.mkdirSync(dir);
     }
     let logFile = fs.createWriteStream(
-         `./logs/${name}.js`, {flags: 'a'});
+        dir + `/${name}.js`, {flags: 'a'});
     logFile.write(util.format(data) + '\n');
 };
