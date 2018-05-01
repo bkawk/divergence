@@ -22,7 +22,7 @@ module.exports = class BitFinexService {
      * @return {bitfinexSubscriptions[]} subscriptions promise
      */
     createBitfinexSubscriptions() {
-        return new Promise(function(resolve, reject) {
+        return new Promise((resolve, reject) => {
             let bitfinexSubscriptions = [];
             this.timeFrames.forEach((timeFrames) => {
                 this.pairs.forEach((pairs) => {
@@ -34,7 +34,7 @@ module.exports = class BitFinexService {
                 });
             });
             resolve(bitfinexSubscriptions);
-        }.bind(this));
+        });
     }
     /**
      * Get Bitfinex Data
@@ -42,7 +42,7 @@ module.exports = class BitFinexService {
      * @return {bitfinexData[]} bitfinexData promise
      */
     getBitfinexData(bitfinexSubscriptions) {
-        return new Promise(function(resolve, reject) {
+        return new Promise((resolve, reject) => {
             let initialDataComplete = 0;
             const w = new Ws(this.apiUrl);
             w.on('message', (msg) => {
@@ -104,7 +104,7 @@ module.exports = class BitFinexService {
                     w.send(JSON.stringify(bitfinexSubscriptions[i]));
                 });
             });
-        }.bind(this));
+        });
     }
 };
 
