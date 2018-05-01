@@ -1,6 +1,6 @@
 'use strict';
 
-const divergenceStrategy = require('./divergencestrategy');
+const divergenceStrategy = require('./divergenceStrategy');
 const spike = require('./spike');
 /** 
  * Detect Divegence
