@@ -13,42 +13,23 @@ const spike = require('./spike');
  */
 module.exports = function createColumns(price, rsi, timeFrame, pair) {
     return new Promise(function(resolve, reject) {
-        let column = [];
+        let columns = [];
         price.forEach((entry, i) => {
             if (price && i > 0 && i < 18) {
                 const priceSpike = spike(price[i + 1], price[i], price[i - 1]);
                 const rsiSpike = spike(rsi[i + 1], rsi[i], rsi[i - 1]);
-                let data = {column: i, priceValue: price[i], rsiValue: rsi[i], priceSpike: priceSpike, rsiSpike: rsiSpike};
+                const column = i;
+                const priceValue = price[i];
+                const rsiValue = rsi[i];
+                let data = {column, priceValue, rsiValue, priceSpike, rsiSpike};
                 if (isJson(data)) {
-                    column.push(data);
-                } else {
-                    console.log('Bad Data 2');
-                }
+                    columns.push(data);
+                };
             }
         });
-
-        let periods = [
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11,
-            12,
-            13,
-            14,
-            15,
-            16,
-            17,
-            18,
-        ];
-        if (column.length > 1) {
+        if (columns.length > 1) {
             Promise.all([
-                divergenceStrategy(column, pair, timeFrame, periods),
+                divergenceStrategy(columns, pair, timeFrame),
             ])
             .then(function(res) {
                 res.forEach((data) => {

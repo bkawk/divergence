@@ -12,8 +12,7 @@ const slope = require('./slope');
  */
 module.exports = function divergenceStrategy(column, pair, timeFrame, period) {
     return new Promise(function(resolve, reject) {
-        period.forEach((period) => {
-            let i = period;
+        column.forEach((i) => {
             if (
                 i <= 16 &&
                 column[2].priceSpike == 'up' &&
@@ -23,22 +22,20 @@ module.exports = function divergenceStrategy(column, pair, timeFrame, period) {
                 column[i].priceValue < column[2].priceValue &&
                 column[i].rsiValue > column[2].rsiValue
             ) {
-                let firstPriceSpikeValue = column[2].priceValue;
-                let secondPriceSpikeValue = column[i].priceValue;
-                let firstRsiSpikeValue = column[2].rsiValue;
-                let secondRsiSpikeValue = column[i].rsiValue;
+                const firstPriceSpikeValue = column[2].priceValue;
+                const secondPriceSpikeValue = column[i].priceValue;
+                const firstRsiSpikeValue = column[2].rsiValue;
+                const secondRsiSpikeValue = column[i].rsiValue;
                 let x;
                 for (x = 2; x <= i; x++) {
-                    let priceSlope = slope(i,
-                        firstPriceSpikeValue,
-                        secondPriceSpikeValue, 'bearish');
-                    let rsiSlope = slope(i,
-                        firstRsiSpikeValue,
-                        secondRsiSpikeValue, 'bearish');
-                    if (priceSlope && rsiSlope) {
-                        if (x == i) {
-                            resolve({divergence: true, period: i, direction: 'bearish', pair: pair, timeFrame: timeFrame, data: column});
-                        }
+                    const priceSlope = slope(i, firstPriceSpikeValue, secondPriceSpikeValue, 'bearish');
+                    const rsiSlope = slope(i, firstRsiSpikeValue, secondRsiSpikeValue, 'bearish');
+                    if (priceSlope && rsiSlope && x == i) {
+                        const divergence = true;
+                        const period = i;
+                        const direction = 'bearish';
+                        const data = column;
+                        resolve({divergence, period, direction, pair, timeFrame, data});
                     } else {
                         break;
                     }
@@ -53,29 +50,20 @@ module.exports = function divergenceStrategy(column, pair, timeFrame, period) {
                 column[i].priceValue > column[2].priceValue &&
                 column[i].rsiValue < column[2].rsiValue
             ) {
-                let firstPriceSpikeValue = column[2].priceValue;
-                let secondPriceSpikeValue = column[i].priceValue;
-                let firstRsiSpikeValue = column[2].rsiValue;
-                let secondRsiSpikeValue = column[i].rsiValue;
+                const firstPriceSpikeValue = column[2].priceValue;
+                const secondPriceSpikeValue = column[i].priceValue;
+                const firstRsiSpikeValue = column[2].rsiValue;
+                const secondRsiSpikeValue = column[i].rsiValue;
                 let x;
                 for (x = 2; x <= i; x++) {
-                    let priceSlope = slope(i,
-                        firstPriceSpikeValue,
-                        secondPriceSpikeValue, 'bullish');
-                    let rsiSlope = slope(i,
-                        firstRsiSpikeValue,
-                        secondRsiSpikeValue, 'bullish');
-                    if (priceSlope && rsiSlope) {
-                        if (x == i) {
-                            resolve({
-                                divergence: true,
-                                period: i,
-                                direction: 'bullish',
-                                pair: pair,
-                                timeFrame: timeFrame,
-                                data: column,
-                            });
-                        }
+                    const priceSlope = slope(i, firstPriceSpikeValue, secondPriceSpikeValue, 'bullish');
+                    const rsiSlope = slope(i, firstRsiSpikeValue, secondRsiSpikeValue, 'bullish');
+                    if (priceSlope && rsiSlope && x == i) {
+                        const divergence = true;
+                        const period = i;
+                        const direction = 'bullish';
+                        const data = column;
+                        resolve({divergence, period, direction, pair, timeFrame, data});
                     } else {
                         break;
                     }
