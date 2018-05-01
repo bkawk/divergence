@@ -9,10 +9,22 @@ const util = require('util');
  */
 module.exports = function saveData(name, data) {
     var dir = './logs';
-        if (!fs.existsSync(dir)){
+    if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir);
     }
-    let logFile = fs.createWriteStream(
-         `./logs/${name}.js`, {flags: 'a'});
-    logFile.write(util.format(data) + '\n');
+    if (fs.existsSync(`./logs/${name}.json`)) {
+        let filedata = JSON.parse(fs.readFileSync(`./logs/${name}.json`, 'utf8'));
+        console.log(filedata);
+        filedata.push(data);
+        write(filedata);
+    } else {
+        write(data);
+    }
+
+    function write(data) {
+        let logfile = fs.createWriteStream(`./logs/${name}.json`, { flags: 'w' });
+        logfile.write(JSON.stringify(data));
+    }
+
 };
+
