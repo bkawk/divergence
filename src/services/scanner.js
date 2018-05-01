@@ -1,7 +1,8 @@
 'use strict';
 const calculateRSI = require('../functions/calculateRSI');
 const createColumns = require('../functions/createColumns');
-const saveData = require('../tasks/saveData');
+const dbSet = require('../tasks/database');
+const isJson = require('../functions/isJson');
 /**
  * A service that do scanning for divergence
 */
@@ -26,14 +27,12 @@ module.exports = class ScannerService {
                         );
                     })
         .then((divergence) => {
-            saveData(
-                'divergence',
-                `{"pair": ${JSON.stringify(divergence.pair)},
-                "timeFrame": ${JSON.stringify(divergence.timeFrame)},
-                "period": ${divergence.period},
-                "direction": ${JSON.stringify(divergence.direction)},
-                "column": ${JSON.stringify(divergence.data)}}`
-            );
+            const dataToSave = {pair: divergence.pair, timeFrame: divergence.timeFrame, period: divergence.period, direction: divergence.direction, column: divergence.data};
+            if (isJson(divergence.data)) {
+                dbSet(dataToSave);
+            } else {
+                console.log('Bad Data')
+            }
         })
         .catch((error) => {
             console.log(error);

@@ -31,20 +31,13 @@ module.exports = function divergenceStrategy(column, pair, timeFrame, period) {
                 for (x = 2; x <= i; x++) {
                     let priceSlope = slope(i,
                         firstPriceSpikeValue,
-                        secondPriceSpikeValue);
+                        secondPriceSpikeValue, 'bearish');
                     let rsiSlope = slope(i,
                         firstRsiSpikeValue,
-                        secondRsiSpikeValue);
+                        secondRsiSpikeValue, 'bearish');
                     if (priceSlope && rsiSlope) {
                         if (x == i) {
-                            resolve({
-                                divergence: true,
-                                period: i,
-                                direction: 'bearish',
-                                pair: pair,
-                                timeFrame: timeFrame,
-                                data: column,
-                            });
+                            resolve({divergence: true, period: i, direction: 'bearish', pair: pair, timeFrame: timeFrame, data: column});
                         }
                     } else {
                         break;
@@ -68,10 +61,10 @@ module.exports = function divergenceStrategy(column, pair, timeFrame, period) {
                 for (x = 2; x <= i; x++) {
                     let priceSlope = slope(i,
                         firstPriceSpikeValue,
-                        secondPriceSpikeValue);
+                        secondPriceSpikeValue, 'bullish');
                     let rsiSlope = slope(i,
                         firstRsiSpikeValue,
-                        secondRsiSpikeValue);
+                        secondRsiSpikeValue, 'bullish');
                     if (priceSlope && rsiSlope) {
                         if (x == i) {
                             resolve({

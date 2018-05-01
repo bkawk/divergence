@@ -1,5 +1,5 @@
 'use strict';
-
+const isJson = require('../functions/isJson');
 const divergenceStrategy = require('./divergenceStrategy');
 const spike = require('./spike');
 /**
@@ -16,14 +16,14 @@ module.exports = function createColumns(price, rsi, timeFrame, pair) {
         let column = [];
         price.forEach((entry, i) => {
             if (price && i > 0 && i < 18) {
-                let data = {
-                    column: i,
-                    priceValue: price[i],
-                    rsiValue: rsi[i],
-                    priceSpike: spike(price[i + 1], price[i], price[i - 1]),
-                    rsiSpike: spike(rsi[i + 1], rsi[i], rsi[i - 1]),
-                };
-                column.push(data);
+                const priceSpike = spike(price[i + 1], price[i], price[i - 1]);
+                const rsiSpike = spike(rsi[i + 1], rsi[i], rsi[i - 1]);
+                let data = {column: i, priceValue: price[i], rsiValue: rsi[i], priceSpike: priceSpike, rsiSpike: rsiSpike};
+                if (isJson(data)) {
+                    column.push(data);
+                } else {
+                    console.log('Bad Data 2');
+                }
             }
         });
 

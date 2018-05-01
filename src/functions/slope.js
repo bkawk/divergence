@@ -8,9 +8,14 @@
  * @param {number} secondValue The proce data
  * @return {boolean} true or false
  */
-module.exports = function slope(period, firstValue, secondValue) {
+module.exports = function slope(period, firstValue, secondValue, bullBear) {
     let slopeValue = (
         (firstValue - secondValue) /
         Math.abs(period - 2)) * period;
-    return (secondValue < slopeValue);
+        if (bullBear == 'bullish') {
+            return (secondValue <= slopeValue);
+        } else {
+            return (secondValue >= slopeValue)
+        }
+    
 };

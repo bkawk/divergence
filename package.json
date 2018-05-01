@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "./node_modules/.bin/eslint src/*",
-    "now": "NODE_ENV='development' nodemon src/index.js"
+    "now": "node src/index.js"
   },
   "repository": {
     "type": "git",
@@ -20,6 +20,8 @@
   "homepage": "https://github.com/bkawk/divergence#readme",
   "dependencies": {
     "@solazu/technicalindicators": "^2.0.8",
+    "leveldown": "^3.0.1",
+    "levelup": "^2.0.2",
     "moment": "^2.22.1",
     "ws": "^5.1.1"
   },

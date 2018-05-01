@@ -13,10 +13,10 @@
 
  module.exports = function spike(left, target, right) {
     if (target > left && target > right) {
-        return 'up';
+        return "up";
     } else if (target < left && target < right) {
-        return 'down';
+        return "down";
     } else {
-        return 'none';
+        return "none";
     }
 };
