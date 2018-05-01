@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "./node_modules/.bin/eslint index.js",
-    "now": "NODE_ENV='development' nodemon index.js"
+    "now": "NODE_ENV='development' nodemon src/index.js"
   },
   "repository": {
     "type": "git",
