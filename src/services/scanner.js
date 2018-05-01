@@ -30,7 +30,7 @@ module.exports = class ScannerService {
                     .then((divergence) => {
                         saveData(
                             'divergence',
-                            `{"pair": ${JSON.stringify(divergence.pair)}, "timeFrame": ${JSON.stringify(divergence.timeFrame)}, "period": ${divergence.period}, "direction": ${JSON.stringify(divergence.direction)}, "column": ${JSON.stringify(divergence.data)}},`
+                            `{"pair": ${JSON.stringify(divergence.pair)}, "timeFrame": ${JSON.stringify(divergence.timeFrame)}, "period": ${divergence.period}, "direction": ${JSON.stringify(divergence.direction)}, "column": ${JSON.stringify(divergence.data)}}`
                         );
                     })
                     .catch((error) => {
