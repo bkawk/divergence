@@ -11,7 +11,7 @@ const slope = require('./slope');
  * @return {object} divergence report
  */
 module.exports = function divergenceStrategy(column, pair, timeFrame, period) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         period.forEach((period) => {
             let i = period;
             if (
@@ -50,7 +50,6 @@ module.exports = function divergenceStrategy(column, pair, timeFrame, period) {
                         break;
                     }
                 }
-
             }
             if (
                 i <= 15 &&

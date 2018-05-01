@@ -1,7 +1,7 @@
 'use strict';
-const Ws = require('ws'); 
+const Ws = require('ws');
 const moment = require('moment');
-/** 
+/**
 * A service that deal with bitfinex service
 */
 module.exports = class BitFinexService {
@@ -22,7 +22,7 @@ module.exports = class BitFinexService {
      * @return {bitfinexSubscriptions[]} subscriptions promise
      */
     createBitfinexSubscriptions() {
-        return new Promise(function (resolve, reject) {
+        return new Promise(function(resolve, reject) {
             let bitfinexSubscriptions = [];
             this.timeFrames.forEach((timeFrames) => {
                 this.pairs.forEach((pairs) => {
@@ -42,7 +42,7 @@ module.exports = class BitFinexService {
      * @return {bitfinexData[]} bitfinexData promise
      */
     getBitfinexData(bitfinexSubscriptions) {
-        return new Promise(function (resolve, reject) {
+        return new Promise(function(resolve, reject) {
             let initialDataComplete = 0;
             const w = new Ws(this.apiUrl);
             w.on('message', (msg) => {
@@ -89,7 +89,8 @@ module.exports = class BitFinexService {
                     if (pairData.length >= 150) {
                         pairData.shift();
                     }
-                    if (this.bitfinexData.length == bitfinexSubscriptions.length &&
+                    if (
+            this.bitfinexData.length == bitfinexSubscriptions.length &&
                         initialDataComplete == 0) {
                         initialDataComplete = 1;
                         console.log(`Initial Bitfinex data complete`);
@@ -105,6 +106,5 @@ module.exports = class BitFinexService {
             });
         }.bind(this));
     }
-
 };
 

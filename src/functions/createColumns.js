@@ -2,7 +2,7 @@
 
 const divergenceStrategy = require('./divergenceStrategy');
 const spike = require('./spike');
-/** 
+/**
  * Detect Divegence
  * First stage of finding a divergence by preparing the column array
  * @param {object} price The price array data
@@ -12,7 +12,7 @@ const spike = require('./spike');
  * @return {boolean} has a divergence been found true/false
  */
 module.exports = function createColumns(price, rsi, timeFrame, pair) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         let column = [];
         price.forEach((entry, i) => {
             if (price && i > 0 && i < 18) {
@@ -50,16 +50,16 @@ module.exports = function createColumns(price, rsi, timeFrame, pair) {
             Promise.all([
                 divergenceStrategy(column, pair, timeFrame, periods),
             ])
-                .then(function (res) {
-                    res.forEach((data) => {
-                        if (data.divergence) {
-                            resolve(data);
-                        };
-                    });
-                })
-                .catch(function (err) {
-                    console.error('Promise.all error', err);
+            .then(function(res) {
+                res.forEach((data) => {
+                    if (data.divergence) {
+                        resolve(data);
+                    };
                 });
+            })
+            .catch(function(err) {
+                console.error('Promise.all error', err);
+            });
         }
     });
 };

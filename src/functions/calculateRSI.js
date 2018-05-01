@@ -8,7 +8,7 @@ const RSI = require('@solazu/technicalindicators').RSI;
  * @return {object} the RSI Array
  */
 module.exports = function calculateRSI(priceArray) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         let closeArray = [];
         priceArray.forEach((entry) => {
             if (entry.close) {

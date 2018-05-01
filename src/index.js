@@ -87,11 +87,11 @@ setImmediate(() => {
             let waitingForHour = 0;
             setInterval(() => {
                 if (waitingForHour == 0) {
-                    console.log(`Waiting for the top of the hour before scanning`);
+        console.log(`Waiting for the top of the hour before scanning`);
                     waitingForHour = 1;
                 }
-                let minutes = new Date().getMinutes(); // eslint-disable-line no-unused-vars
-                let seconds = new Date().getSeconds(); // eslint-disable-line no-unused-vars
+let minutes = new Date().getMinutes(); // eslint-disable-line no-unused-vars
+let seconds = new Date().getSeconds(); // eslint-disable-line no-unused-vars
                 // if (minutes == 0 && seconds == 0 ){
                 console.log(`Top of the hour is now`);
                 scannerService.scan(bitfinexService.bitfinexData);
