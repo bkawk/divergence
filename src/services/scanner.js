@@ -13,7 +13,7 @@ module.exports = class ScannerService {
     scan(bitfinexData) {
         return new Promise((resolve, reject) => {
             console.log(`Scanning Data now`);
-            let dataArray = bitfinexData;
+            const dataArray = bitfinexData;
             dataArray.forEach((results) => {
                 calculateRSI(results.data)
                 .then((rsiAndPrice) => {

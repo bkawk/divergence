@@ -15,11 +15,11 @@ module.exports = function calculateRSI(priceArray) {
                 values.push(entry.close);
             }
         });
-        let inputRSI = {values, period: 14, reversedInput: true};
-        let rsiArray = (RSI.calculate(inputRSI));
+        const inputRSI = {values, period: 14, reversedInput: true};
+        const rsiArray = (RSI.calculate(inputRSI));
         if (values.length > 0 && rsiArray.length > 0) {
-            let closeArrayTrimmed = values.slice(0, 20);
-            let rsiArrayTrimmed = rsiArray.slice(0, 20);
+            const closeArrayTrimmed = values.slice(0, 20);
+            const rsiArrayTrimmed = rsiArray.slice(0, 20);
             resolve([closeArrayTrimmed, rsiArrayTrimmed]);
         }
     });

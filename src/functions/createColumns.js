@@ -28,9 +28,7 @@ module.exports = function createColumns(price, rsi, timeFrame, pair) {
             }
         });
         if (columns.length > 1) {
-            Promise.all([
-                divergenceStrategy(columns, pair, timeFrame),
-            ])
+            Promise.all([divergenceStrategy(columns, pair, timeFrame)])
             .then(function(res) {
                 res.forEach((data) => {
                     if (data.divergence) {
