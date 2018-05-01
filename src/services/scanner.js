@@ -1,8 +1,7 @@
 'use strict';
 const calculateRSI = require('../functions/calculateRSI');
 const createColumns = require('../functions/createColumns');
-const dbSet = require('../tasks/database');
-const isJson = require('../functions/isJson');
+const dbSet = require('../tasks/dbSet');
 /**
  * A service that do scanning for divergence
 */
@@ -26,17 +25,15 @@ module.exports = class ScannerService {
                             results.pair
                         );
                     })
-        .then((divergence) => {
-            const dataToSave = {pair: divergence.pair, timeFrame: divergence.timeFrame, period: divergence.period, direction: divergence.direction, column: divergence.data};
-            if (isJson(divergence.data)) {
-                dbSet(dataToSave);
-            } else {
-                console.log('Bad Data')
-            }
-        })
-        .catch((error) => {
-            console.log(error);
-        });
+                .then((divergence) => {
+                    // TODO: Add time to the key, get this from bitfinex
+                    const key = `divergence~${divergence.pair}~${divergence.timeFrame}`;
+                    const value = {pair: divergence.pair, timeFrame: divergence.timeFrame, period: divergence.period, direction: divergence.direction, column: divergence.data};
+                    dbSet(key, value);
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
             });
         });
     }

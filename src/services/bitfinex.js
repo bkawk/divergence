@@ -1,6 +1,6 @@
 'use strict';
 const Ws = require('ws');
-const moment = require('moment');
+const dbSet = require('../tasks/dbSet');
 /**
 * A service that deal with bitfinex service
 */
@@ -26,11 +26,10 @@ module.exports = class BitFinexService {
             let bitfinexSubscriptions = [];
             this.timeFrames.forEach((timeFrames) => {
                 this.pairs.forEach((pairs) => {
-                    bitfinexSubscriptions.push({
-                        event: 'subscribe',
-                        channel: 'candles',
-                        key: `trade:${timeFrames}:t${pairs}`,
-                    });
+                    const event = 'subscribe';
+                    const channel = 'candles';
+                    const key = `trade:${timeFrames}:t${pairs}`;
+                    bitfinexSubscriptions.push({event, channel, key});
                 });
             });
             resolve(bitfinexSubscriptions);
@@ -45,52 +44,54 @@ module.exports = class BitFinexService {
         return new Promise((resolve, reject) => {
             let initialDataComplete = 0;
             const w = new Ws(this.apiUrl);
-            w.on('message', (msg) => {
-                let data = JSON.parse(msg);
-                if (data.event == 'subscribed' && data.channel == 'candles') {
-                    let key = data.key.split(':');
-                    this.bitfinexData.push({
-                        pair: key[2],
-                        timeFrame: key[1],
-                        chanId: data.chanId,
-                        data: [],
-                    });
-                } else if (data[0] != undefined && data[1] != 'hb') {
-                    let chanId = data[0];
-                    let price = data[1];
-                    let time = moment.unix(price[0]).local().format('HH:mm');
-                    let pair = this.bitfinexData.filter((obj) => {
+            w.on('message', (_msg) => {
+                const msg = JSON.parse(_msg);
+                let timeFrame;
+                let pair;
+                if (msg.event == 'subscribed' && msg.channel == 'candles') {
+                    const item = msg.key.split(':');
+                    pair = item[2];
+                    timeFrame = item[1];
+                    const chanId = msg.chanId;
+                    const data = [];
+                    this.bitfinexData.push({pair, timeFrame, chanId, data});
+                } else if (msg[0] != undefined && msg[1] != 'hb') {
+                    const chanId = msg[0];
+                    const price = msg[1];
+                    const lookup = this.bitfinexData.filter((obj) => {
                         return obj.chanId === chanId;
                     });
-                    let pairData = pair[0].data;
+                    let pairData = lookup[0].data;
                     if (price.length > 6) {
                         price.forEach((price) => {
-                            let time = moment.unix(
-                                price[0]).local().format('HH:mm');
-                            pairData.push({
-                                open: price[1],
-                                close: price[2],
-                                high: price[3],
-                                low: price[4],
-                                volume: price[5],
-                                time: time,
-                            });
+                            const open = price[1];
+                            const close = price[2];
+                            const high = price[3];
+                            const low = price[4];
+                            const volume = price[5];
+                            const time = price[0];
+                            const key = `price~${pair}~${timeFrame}~${time}`;
+                            const value = {open, close, high, low, volume, time};
+                            pairData.push(value);
+                            dbSet(key, value);
                         });
                     } else {
-                        pairData.push({
-                            open: price[1],
-                            close: price[2],
-                            high: price[3],
-                            low: price[4],
-                            volume: price[5],
-                            time: time,
-                        });
+                        const open = price[1];
+                        const close = price[2];
+                        const high = price[3];
+                        const low = price[4];
+                        const volume = price[5];
+                        const time = price[0];
+                        const key = `price~${pair}~${timeFrame}~${time}`;
+                        const value = {open, close, high, low, volume, time};
+                        pairData.push(value);
+                        dbSet(key, value);
                     }
                     if (pairData.length >= 150) {
                         pairData.shift();
                     }
                     if (
-            this.bitfinexData.length == bitfinexSubscriptions.length &&
+                        this.bitfinexData.length == bitfinexSubscriptions.length &&
                         initialDataComplete == 0) {
                         initialDataComplete = 1;
                         console.log(`Initial Bitfinex data complete`);

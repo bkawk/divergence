@@ -1,12 +1,10 @@
 'use strict';
 module.exports = function isJson(json) {
         const text = JSON.stringify(json);
-        try{
+        try {
             JSON.parse(text);
             return true;
-        }
-        catch (error){
-            console.log('=================ERROR===================')
+        } catch (error) {
             return false;
-        }
+        };
 };

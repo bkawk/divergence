@@ -6,6 +6,7 @@
  * @param {number} period The proce data
  * @param {number} firstValue The proce data
  * @param {number} secondValue The proce data
+ * @param {string} bullBear The proce data
  * @return {boolean} true or false
  */
 module.exports = function slope(period, firstValue, secondValue, bullBear) {
@@ -15,7 +16,6 @@ module.exports = function slope(period, firstValue, secondValue, bullBear) {
         if (bullBear == 'bullish') {
             return (secondValue <= slopeValue);
         } else {
-            return (secondValue >= slopeValue)
-        }
-    
+            return (secondValue >= slopeValue);
+        };
 };
