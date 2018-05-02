@@ -4,13 +4,19 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "nyc mocha --exit --timeout 180000 test/*.js",
+<<<<<<< HEAD
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "./node_modules/.bin/eslint src/*",
+    "now": "node src/index.js"
+=======
+    "test": "nyc mocha --exit --timeout 180000 test/*",
     "test-unit": "nyc mocha --exit test/unit_*",
     "test-func": "nyc mocha --exit test/func_*",
     "test-serv": "nyc mocha --exit test/serv_*",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "lint": "./node_modules/.bin/eslint src/*",
-    "now": "node src/index.js"
+    "lint": "./node_modules/.bin/eslint index.js",
+    "now": "NODE_ENV='development' nodemon src/index.js"
+>>>>>>> 2_Write_2_basic_unit_test
   },
   "repository": {
     "type": "git",
@@ -26,6 +32,8 @@
     "leveldown": "^3.0.1",
     "levelup": "^2.0.2",
     "@solazu/technicalindicators": "^2.0.8",
+<<<<<<< HEAD
+=======
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "mocha": "^5.1.1",
@@ -34,6 +42,10 @@
     "request": "^2.85.0",
     "request-rate-limiter": "^1.0.2",
     "sinon": "^5.0.1",
+    "util": "^0.10.3",
+    "winston": "^2.4.2",
+    "winston-daily-rotate-file": "^3.1.3",
+>>>>>>> 2_Write_2_basic_unit_test
     "ws": "^5.1.1"
   },
   "devDependencies": {
