@@ -11,7 +11,7 @@ const spike = require('./spike');
  * @param {object} pair The pair
  * @return {boolean} has a divergence been found true/false
  */
-module.exports = function createColumns(price, rsi, timeFrame, pair) {
+export function createColumns(price, rsi, timeFrame, pair) {
     return new Promise(function(resolve, reject) {
         let columns = [];
         price.forEach((entry, i) => {

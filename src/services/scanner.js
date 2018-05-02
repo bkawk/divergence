@@ -5,7 +5,7 @@ const dbSet = require('../tasks/dbSet');
 /**
  * A service that scans for divergences
 */
-module.exports = class ScannerService {
+export class ScannerService {
     /**
      * @param {bitfinexData[]} bitfinexData
      * @return {Void} empty promise

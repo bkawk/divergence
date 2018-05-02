@@ -54,7 +54,7 @@ function resolveSlope(column, i, bullOrBear, resolve, pair, timeFrame, period) {
  * @param {object} period The period between spikes
  * @return {object} divergence report
  */
-module.exports = function divergenceStrategy(column, pair, timeFrame, period) {
+export function divergenceStrategy(column, pair, timeFrame, period) {
     return new Promise(function(resolve) {
         column.forEach((i) => {
             if (checkIfUpOrDown(column, i, UP, 16, BULL, pair, timeFrame, period)) {
