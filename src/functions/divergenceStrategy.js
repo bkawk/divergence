@@ -1,35 +1,69 @@
 'use strict';
 
 const slope = require('./slope');
+
 const UP = 'up';
 const DOWN = 'down';
 const BEAR = 'bearish';
 const BULL = 'bullish';
 
-
+/**
+ *
+ * @param {number} i
+ * @param {{}} column
+ * @param {string} upDown
+ * @param {16|18} ? magicNumber
+ * @returns {boolean}
+ */
 function checkIfUpOrDown(i, column, upDown, magicNumber) {
     const secondColumn = column[2];
+    const rsiSpike = 'rsiSpike';
+    const rsiValue = 'rsiValue';
+    const priceSpike = 'priceSpike';
+    const priceValue = 'priceValue';
+
     if (i <= magicNumber &&
-        secondColumn['priceSpike'] === upDown &&
-        column[i].priceSpike === upDown &&
-        secondColumn['rsiSpike'] === upDown &&
-        column[i].rsiSpike === upDown &&
-        column[i].priceValue < secondColumn.priceValue &&
-        column[i].rsiValue > secondColumn.rsiValue) {
+        secondColumn[priceSpike] === upDown &&
+        column[i][priceSpike] === upDown &&
+        secondColumn[rsiSpike] === upDown &&
+        column[i][rsiSpike] === upDown &&
+        column[i][priceValue] < secondColumn[priceValue] &&
+        column[i][rsiValue] > secondColumn[rsiValue]) {
         return true;
     }
     return false;
 }
 
+/**
+ *
+ * @param {{}} column
+ * @param {number} i
+ * @returns {{}}
+ */
 function getValues(column, i) {
+    const firstPriceSpikeValue = column[2].priceValue;
+    const secondPriceSpikeValue = column[i].priceValue;
+    const firstRsiSpikeValue = column[2].rsiValue;
+    const secondRsiSpikeValue =  column[i].rsiValue;
+
     return {
-        firstPriceSpikeValue: column[2].priceValue,
-        secondPriceSpikeValue: column[i].priceValue,
-        firstRsiSpikeValue: column[2].rsiValue,
-        secondRsiSpikeValue: column[i].rsiValue
+        firstPriceSpikeValue,
+        secondPriceSpikeValue,
+        firstRsiSpikeValue,
+        secondRsiSpikeValue
     };
 }
 
+/**
+ *
+ * @param {{}} column
+ * @param {number} i
+ * @param {string} bullOrBear
+ * @param {Promise} resolve
+ * @param {number} pair
+ * @param {number} timeFrame
+ * @param {number} period
+ */
 function resolveSlope(column, i, bullOrBear, resolve, pair, timeFrame, period) {
     const {firstPriceSpikeValue, secondPriceSpikeValue, firstRsiSpikeValue, secondRsiSpikeValue} = getValues(column, i);
     for (let x = 2; x <= i; x++) {
