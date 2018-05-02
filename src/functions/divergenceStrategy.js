@@ -1,5 +1,4 @@
 'use strict';
-
 const slope = require('./slope');
 /**
  * Divergence Strategy
@@ -10,18 +9,20 @@ const slope = require('./slope');
  * @param {object} period The period between spikes
  * @return {object} divergence report
  */
-module.exports = function divergenceStrategy(column, pair, timeFrame, period) {
+module.exports = function divergenceStrategy(column, pair, timeFrame) {
     return new Promise(function(resolve, reject) {
         column.forEach((i) => {
             if (
-                i <= 16 &&
-                column[2].priceSpike == 'up' &&
-                column[i].priceSpike == 'up' &&
-                column[2].rsiSpike == 'up' &&
-                column[i].rsiSpike == 'up' &&
+                i <= 18 &&
+                column[2].priceSpike === 'up' &&
+                column[i].priceSpike === 'up' &&
+                column[2].rsiSpike === 'up' &&
+                column[i].rsiSpike === 'up' &&
                 column[i].priceValue < column[2].priceValue &&
                 column[i].rsiValue > column[2].rsiValue
             ) {
+                console.log('Bearish Divergence Found');
+                console.log(column);
                 const firstPriceSpikeValue = column[2].priceValue;
                 const secondPriceSpikeValue = column[i].priceValue;
                 const firstRsiSpikeValue = column[2].rsiValue;
@@ -30,7 +31,7 @@ module.exports = function divergenceStrategy(column, pair, timeFrame, period) {
                 for (x = 2; x <= i; x++) {
                     const priceSlope = slope(i, firstPriceSpikeValue, secondPriceSpikeValue, 'bearish');
                     const rsiSlope = slope(i, firstRsiSpikeValue, secondRsiSpikeValue, 'bearish');
-                    if (priceSlope && rsiSlope && x == i) {
+                    if (priceSlope && rsiSlope && x === i) {
                         const divergence = true;
                         const period = i;
                         const direction = 'bearish';
@@ -42,14 +43,16 @@ module.exports = function divergenceStrategy(column, pair, timeFrame, period) {
                 }
             }
             if (
-                i <= 15 &&
-                column[2].priceSpike == 'down' &&
-                column[i].priceSpike == 'down' &&
-                column[2].rsiSpike == 'down' &&
-                column[i].rsiSpike == 'down' &&
+                i <= 18 &&
+                column[2].priceSpike === 'down' &&
+                column[i].priceSpike === 'down' &&
+                column[2].rsiSpike === 'down' &&
+                column[i].rsiSpike === 'down' &&
                 column[i].priceValue > column[2].priceValue &&
                 column[i].rsiValue < column[2].rsiValue
             ) {
+                console.log('Bullish Divergence Found');
+                console.log(column);
                 const firstPriceSpikeValue = column[2].priceValue;
                 const secondPriceSpikeValue = column[i].priceValue;
                 const firstRsiSpikeValue = column[2].rsiValue;
@@ -58,7 +61,7 @@ module.exports = function divergenceStrategy(column, pair, timeFrame, period) {
                 for (x = 2; x <= i; x++) {
                     const priceSlope = slope(i, firstPriceSpikeValue, secondPriceSpikeValue, 'bullish');
                     const rsiSlope = slope(i, firstRsiSpikeValue, secondRsiSpikeValue, 'bullish');
-                    if (priceSlope && rsiSlope && x == i) {
+                    if (priceSlope && rsiSlope && x === i) {
                         const divergence = true;
                         const period = i;
                         const direction = 'bullish';

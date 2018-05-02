@@ -18,9 +18,9 @@ module.exports = function calculateRSI(priceArray) {
         const inputRSI = {values, period: 14, reversedInput: true};
         const rsiArray = (RSI.calculate(inputRSI));
         if (values.length > 0 && rsiArray.length > 0) {
-            const closeArrayTrimmed = values.slice(0, 20);
+            const priceArrayTrimmed = priceArray.slice(0, 20);
             const rsiArrayTrimmed = rsiArray.slice(0, 20);
-            resolve([closeArrayTrimmed, rsiArrayTrimmed]);
+            resolve([priceArrayTrimmed, rsiArrayTrimmed]);
         }
     });
 };
