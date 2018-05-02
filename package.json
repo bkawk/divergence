@@ -19,9 +19,9 @@
   },
   "homepage": "https://github.com/bkawk/divergence#readme",
   "dependencies": {
-    "@solazu/technicalindicators": "^2.0.8",
     "leveldown": "^3.0.1",
     "levelup": "^2.0.2",
+    "@solazu/technicalindicators": "^2.0.8",
     "ws": "^5.1.1"
   },
   "devDependencies": {

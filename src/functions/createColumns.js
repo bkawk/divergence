@@ -15,7 +15,7 @@ module.exports = function createColumns(price, rsi, timeFrame, pair) {
     return new Promise(function(resolve, reject) {
         let columns = [];
         price.forEach((entry, i) => {
-            if (price && i > 0 && i < 18) {
+            if (price && i > 0 && i < 20) {
                 const priceSpike = spike(price[i + 1].close, price[i].close, price[i - 1].close);
                 const rsiSpike = spike(rsi[i + 1], rsi[i], rsi[i - 1]);
                 const column = i;

@@ -72,9 +72,8 @@ module.exports = class BitFinexService {
                             const time = price[0];
                             const key = `price~${pair}~${timeFrame}~${time}`;
                             const value = {open, close, high, low, volume, time};
-                            const currentUnixTime = Math.round(new Date().getTime());
-                            const hours = parseInt((currentUnixTime / (1000 * 60 * 60)) % 24);
-                            if (hours > parseInt(time / (1000 * 60 * 60)) % 24) {
+                            let lastHour = new Date(`${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDay()} ${new Date().getHours()}:00`).getTime();
+                            if (time > lastHour) {
                                 pairData.push(value);
                                 dbSet(key, value);
                             }
@@ -87,12 +86,11 @@ module.exports = class BitFinexService {
                         const volume = price[5];
                         const time = price[0];
                         const key = `price~${pair}~${timeFrame}~${time}`;
-                        const value = { open, close, high, low, volume, time };
-                        const currentUnixTime = Math.round(new Date().getTime());
-                        const hours = parseInt((currentUnixTime / (1000 * 60 * 60)) % 24);
-                        if (hours > parseInt(time / (1000 * 60 * 60)) % 24) {
+                        const value = {open, close, high, low, volume, time};
+                        const lastHour = new Date(`${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDay()} ${new Date().getHours()}:00`).getTime();
+                        if (time > lastHour) {
                             pairData.push(value);
-                            dbSet(key, value);   
+                            dbSet(key, value);
                         }
                     }
                     if (pairData.length >= 150) {
