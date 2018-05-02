@@ -63,6 +63,8 @@ function getValues(column, i) {
  * @param {number} pair
  * @param {number} timeFrame
  * @param {number} period
+ *
+ * would be best to de-construct all these params
  */
 function resolveSlope(column, i, bullOrBear, resolve, pair, timeFrame, period) {
     const {firstPriceSpikeValue, secondPriceSpikeValue, firstRsiSpikeValue, secondRsiSpikeValue} = getValues(column, i);
