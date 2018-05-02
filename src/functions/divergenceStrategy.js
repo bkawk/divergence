@@ -1,5 +1,4 @@
 'use strict';
-
 const slope = require('./slope');
 
 const UP = 'up';
@@ -90,6 +89,7 @@ function resolveSlope(column, i, bullOrBear, resolve, pair, timeFrame, period) {
  * @param {object} period The period between spikes
  * @return {object} divergence report
  */
+
 export function divergenceStrategy(column, pair, timeFrame, period) {
     return new Promise(function(resolve) {
         column.forEach((i) => {
@@ -98,6 +98,7 @@ export function divergenceStrategy(column, pair, timeFrame, period) {
             }
             if (checkIfUpOrDown(column, i, DOWN, 15, BEAR, pair, timeFrame, period)) {
                 resolveSlope(i, column, resolve);
+
             }
         });
     });

@@ -15,13 +15,14 @@ export function createColumns(price, rsi, timeFrame, pair) {
     return new Promise(function(resolve, reject) {
         let columns = [];
         price.forEach((entry, i) => {
-            if (price && i > 0 && i < 18) {
-                const priceSpike = spike(price[i + 1], price[i], price[i - 1]);
+            if (price && i > 0 && i < 20) {
+                const priceSpike = spike(price[i + 1].close, price[i].close, price[i - 1].close);
                 const rsiSpike = spike(rsi[i + 1], rsi[i], rsi[i - 1]);
                 const column = i;
-                const priceValue = price[i];
+                const priceValue = price[i].close;
                 const rsiValue = rsi[i];
-                let data = {column, priceValue, rsiValue, priceSpike, rsiSpike};
+                const time = price[i].time;
+                let data = {column, priceValue, rsiValue, priceSpike, rsiSpike, time};
                 if (isJson(data)) {
                     columns.push(data);
                 };

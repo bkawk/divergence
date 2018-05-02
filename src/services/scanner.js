@@ -12,7 +12,7 @@ export class ScannerService {
      */
     scan(bitfinexData) {
         return new Promise((resolve, reject) => {
-            console.log(`Scanning Data now`);
+            console.log(`Scanning Data`);
             const dataArray = bitfinexData;
             dataArray.forEach((results) => {
                 calculateRSI(results.data)
@@ -24,6 +24,7 @@ export class ScannerService {
                     return createColumns(price, rsi, timeFrame, pair);
                 })
                 .then((divergence) => {
+                    console.log('Divergence Found');
                     const key = `divergence~${divergence.pair}~${divergence.timeFrame}`;
                     const value = {pair: divergence.pair, timeFrame: divergence.timeFrame, period: divergence.period, direction: divergence.direction, column: divergence.data};
                     dbSet(key, value);

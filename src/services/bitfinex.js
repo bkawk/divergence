@@ -48,7 +48,7 @@ export class BitFinexService {
                 const msg = JSON.parse(_msg);
                 let timeFrame;
                 let pair;
-                if (msg.event == 'subscribed' && msg.channel == 'candles') {
+                if (msg.event === 'subscribed' && msg.channel === 'candles') {
                     const item = msg.key.split(':');
                     pair = item[2];
                     timeFrame = item[1];
@@ -72,8 +72,11 @@ export class BitFinexService {
                             const time = price[0];
                             const key = `price~${pair}~${timeFrame}~${time}`;
                             const value = {open, close, high, low, volume, time};
-                            pairData.push(value);
-                            dbSet(key, value);
+                            let lastHour = new Date(`${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDay()} ${new Date().getHours()}:00`).getTime();
+                            if (time > lastHour) {
+                                pairData.push(value);
+                                dbSet(key, value);
+                            }
                         });
                     } else {
                         const open = price[1];
@@ -84,15 +87,18 @@ export class BitFinexService {
                         const time = price[0];
                         const key = `price~${pair}~${timeFrame}~${time}`;
                         const value = {open, close, high, low, volume, time};
-                        pairData.push(value);
-                        dbSet(key, value);
+                        const lastHour = new Date(`${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDay()} ${new Date().getHours()}:00`).getTime();
+                        if (time > lastHour) {
+                            pairData.push(value);
+                            dbSet(key, value);
+                        }
                     }
                     if (pairData.length >= 150) {
                         pairData.shift();
                     }
                     if (
-                        this.bitfinexData.length == bitfinexSubscriptions.length &&
-                        initialDataComplete == 0) {
+                        this.bitfinexData.length === bitfinexSubscriptions.length &&
+                        initialDataComplete === 0) {
                         initialDataComplete = 1;
                         console.log(`Initial Bitfinex data complete`);
                         console.log(`Listening for more data on websockets`);
