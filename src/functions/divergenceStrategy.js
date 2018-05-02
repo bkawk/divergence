@@ -1,5 +1,85 @@
 'use strict';
 const slope = require('./slope');
+
+const UP = 'up';
+const DOWN = 'down';
+const BEAR = 'bearish';
+const BULL = 'bullish';
+
+/**
+ *
+ * @param {number} i
+ * @param {{}} column
+ * @param {string} upDown
+ * @param {16|18} ? magicNumber
+ * @returns {boolean}
+ */
+function checkIfUpOrDown(i, column, upDown, magicNumber) {
+    const secondColumn = column[2];
+    const rsiSpike = 'rsiSpike';
+    const rsiValue = 'rsiValue';
+    const priceSpike = 'priceSpike';
+    const priceValue = 'priceValue';
+
+    if (i <= magicNumber &&
+        secondColumn[priceSpike] === upDown &&
+        column[i][priceSpike] === upDown &&
+        secondColumn[rsiSpike] === upDown &&
+        column[i][rsiSpike] === upDown &&
+        column[i][priceValue] < secondColumn[priceValue] &&
+        column[i][rsiValue] > secondColumn[rsiValue]) {
+        return true;
+    }
+    return false;
+}
+
+/**
+ *
+ * @param {{}} column
+ * @param {number} i
+ * @returns {{}}
+ */
+function getValues(column, i) {
+    const firstPriceSpikeValue = column[2].priceValue;
+    const secondPriceSpikeValue = column[i].priceValue;
+    const firstRsiSpikeValue = column[2].rsiValue;
+    const secondRsiSpikeValue =  column[i].rsiValue;
+
+    return {
+        firstPriceSpikeValue,
+        secondPriceSpikeValue,
+        firstRsiSpikeValue,
+        secondRsiSpikeValue
+    };
+}
+
+/**
+ *
+ * @param {{}} column
+ * @param {number} i
+ * @param {string} bullOrBear
+ * @param {Promise} resolve
+ * @param {number} pair
+ * @param {number} timeFrame
+ * @param {number} period
+ *
+ * would be best to de-construct all these params
+ */
+function resolveSlope(column, i, bullOrBear, resolve, pair, timeFrame, period) {
+    const {firstPriceSpikeValue, secondPriceSpikeValue, firstRsiSpikeValue, secondRsiSpikeValue} = getValues(column, i);
+    for (let x = 2; x <= i; x++) {
+        const priceSlope = slope(i, firstPriceSpikeValue, secondPriceSpikeValue, bullOrBear);
+        const rsiSlope = slope(i, firstRsiSpikeValue, secondRsiSpikeValue, bullOrBear);
+        if (priceSlope && rsiSlope && x === i) {
+            const divergence = true;
+            const period = i;
+            resolve({divergence, period, bullOrBear, pair, timeFrame, column});
+        } else {
+            break;
+        }
+    }
+}
+
 /**
  * Divergence Strategy
  * For each of the items in the column array we look for divergence
@@ -9,68 +89,16 @@ const slope = require('./slope');
  * @param {object} period The period between spikes
  * @return {object} divergence report
  */
-module.exports = function divergenceStrategy(column, pair, timeFrame) {
-    return new Promise(function(resolve, reject) {
+
+export function divergenceStrategy(column, pair, timeFrame, period) {
+    return new Promise(function(resolve) {
         column.forEach((i) => {
-            if (
-                i <= 18 &&
-                column[2].priceSpike === 'up' &&
-                column[i].priceSpike === 'up' &&
-                column[2].rsiSpike === 'up' &&
-                column[i].rsiSpike === 'up' &&
-                column[i].priceValue < column[2].priceValue &&
-                column[i].rsiValue > column[2].rsiValue
-            ) {
-                console.log('Bearish Divergence Found');
-                console.log(column);
-                const firstPriceSpikeValue = column[2].priceValue;
-                const secondPriceSpikeValue = column[i].priceValue;
-                const firstRsiSpikeValue = column[2].rsiValue;
-                const secondRsiSpikeValue = column[i].rsiValue;
-                let x;
-                for (x = 2; x <= i; x++) {
-                    const priceSlope = slope(i, firstPriceSpikeValue, secondPriceSpikeValue, 'bearish');
-                    const rsiSlope = slope(i, firstRsiSpikeValue, secondRsiSpikeValue, 'bearish');
-                    if (priceSlope && rsiSlope && x === i) {
-                        const divergence = true;
-                        const period = i;
-                        const direction = 'bearish';
-                        const data = column;
-                        resolve({divergence, period, direction, pair, timeFrame, data});
-                    } else {
-                        break;
-                    }
-                }
+            if (checkIfUpOrDown(column, i, UP, 16, BULL, pair, timeFrame, period)) {
+                resolveSlope(i, column, resolve);
             }
-            if (
-                i <= 18 &&
-                column[2].priceSpike === 'down' &&
-                column[i].priceSpike === 'down' &&
-                column[2].rsiSpike === 'down' &&
-                column[i].rsiSpike === 'down' &&
-                column[i].priceValue > column[2].priceValue &&
-                column[i].rsiValue < column[2].rsiValue
-            ) {
-                console.log('Bullish Divergence Found');
-                console.log(column);
-                const firstPriceSpikeValue = column[2].priceValue;
-                const secondPriceSpikeValue = column[i].priceValue;
-                const firstRsiSpikeValue = column[2].rsiValue;
-                const secondRsiSpikeValue = column[i].rsiValue;
-                let x;
-                for (x = 2; x <= i; x++) {
-                    const priceSlope = slope(i, firstPriceSpikeValue, secondPriceSpikeValue, 'bullish');
-                    const rsiSlope = slope(i, firstRsiSpikeValue, secondRsiSpikeValue, 'bullish');
-                    if (priceSlope && rsiSlope && x === i) {
-                        const divergence = true;
-                        const period = i;
-                        const direction = 'bullish';
-                        const data = column;
-                        resolve({divergence, period, direction, pair, timeFrame, data});
-                    } else {
-                        break;
-                    }
-                }
+            if (checkIfUpOrDown(column, i, DOWN, 15, BEAR, pair, timeFrame, period)) {
+                resolveSlope(i, column, resolve);
+
             }
         });
     });

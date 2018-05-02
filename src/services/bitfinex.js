@@ -4,7 +4,7 @@ const dbSet = require('../tasks/dbSet');
 /**
 * A service that deal with bitfinex service
 */
-module.exports = class BitFinexService {
+export class BitFinexService {
     /**
      * Create BitFinexService
      * @param {Object[]} timeFrames the time frame needed

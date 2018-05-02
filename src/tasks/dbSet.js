@@ -9,7 +9,7 @@ const isJson = require('../functions/isJson');
  * @param {string} key The proce value
  * @param {object} value The proce value
  */
-module.exports = function dbSet(key, value) {
+export function dbSet(key, value) {
     if (isJson(value)) {
         const data = JSON.stringify(value);
         db.put(key, data, function(err) {

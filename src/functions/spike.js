@@ -11,7 +11,7 @@
  * @return {string} the string indicating direction
  */
 
- module.exports = function spike(left, target, right) {
+export function spike(left, target, right) {
     if (target > left && target > right) {
         return 'up';
     } else if (target < left && target < right) {
