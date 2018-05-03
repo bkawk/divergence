@@ -29,7 +29,6 @@
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "mocha": "^5.1.1",
-    "moment": "^2.22.1",
     "promise-with-status": "^1.0.0",
     "request": "^2.85.0",
     "request-rate-limiter": "^1.0.2",

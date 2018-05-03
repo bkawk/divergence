@@ -6,6 +6,7 @@ var chai = require('chai'),
     assert = chai.assert;
 
 describe('Spike tests', function () {
+
     it('Should return up', function(){
         const target =16.981;
         const left = 16.58363574;

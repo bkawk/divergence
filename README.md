@@ -19,4 +19,5 @@ Test the app
     npm test
     npm run-script test-serv
     npm run-script test-func
-    
+    npm run-script test-task
+
