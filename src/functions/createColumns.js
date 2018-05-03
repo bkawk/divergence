@@ -30,12 +30,12 @@ module.exports = function createColumns(price, rsi, timeFrame, pair) {
         });
         if (columns.length >= 18) {
             let i;
-            for (i = 0; i <= 18; i++){
+            for (i = 0; i <= 18; i++) {
                 if (i > 2) {
                     divergence(columns, i, timeFrame, pair)
                     .then((result) => {
                         resolve(result);
-                    })
+                    });
                 }
             };
         }

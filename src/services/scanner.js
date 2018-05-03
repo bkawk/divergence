@@ -27,7 +27,7 @@ module.exports = class ScannerService {
                     if (divergence.direction != 'none') {
                         console.log('Divergence Found');
                         const key = `divergence~${divergence.pair}~${divergence.timeFrame}~${divergence.time}`;
-                        const value = divergence
+                        const value = divergence;
                         dbSet(key, value);
                     }
                 })
