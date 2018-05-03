@@ -1,4 +1,7 @@
-# Divergence Detector
+
+# Divergence Detector 
+[![build status](https://secure.travis-ci.org/bkawk/divergence.svg)](http://travis-ci.org/bkawk/divergence)
+[![coverage status](http://img.shields.io/coveralls/bkawk/divergence.svg)](https://coveralls.io/r/bkawk/divergence)
 
 ### Prerequisites
 
