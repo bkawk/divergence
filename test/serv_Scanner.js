@@ -12,13 +12,14 @@ const Scanner = require('../src/services/scanner');
 describe('Scanner tests', function () {
     let scannerService = new Scanner();
     var dummyData = [
-        { channel: "candles", event: "subscribe", key: "trade:1h:tEOSUSD" },
-        { channel: "candles", event: "subscribe", key: "trade:1h:tZRXUSD" },
-        { channel: "candles", event: "subscribe", key: "trade:2h:tEOSUSD" },
-        { channel: "candles", event: "subscribe", key: "trade:2h:tZRXUSD" }];
 
-    it("scan should return pending promise", function () {
-      
+        { channel: 'candles', event: 'subscribe', key: 'trade:1h:tEOSUSD' },
+        { channel: 'candles', event: 'subscribe', key: 'trade:1h:tZRXUSD' },
+        { channel: 'candles', event: 'subscribe', key: 'trade:2h:tEOSUSD' },
+        { channel: 'candles', event: 'subscribe', key: 'trade:2h:tZRXUSD' }];
+
+    it('scan should return pending promise', function () {
+
     });
 
 });

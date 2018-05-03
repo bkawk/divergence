@@ -1,9 +1,11 @@
-var chai = require('chai'),
+
+const chai = require('chai'),
     should = chai.should,
     expect = chai.expect,
     assert = chai.assert,
     deep = chai.deep;
-var chaiAsPromised = require('chai-as-promised');
+
+const chaiAsPromised = require('chai-as-promised');
 //calling should bef, solved chaiaspromised bug
 chai.should();
 chai.use(chaiAsPromised);
