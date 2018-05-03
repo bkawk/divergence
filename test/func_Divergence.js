@@ -43,14 +43,14 @@ describe('Divergence tests', () => {
             })
     });
 
-    // it('Should return confirmed bullish divergence', () => {
-    //     const columns = confirmedBullishDivergence;
-    //     const pos = 9;
-    //     const timeFrame = "1h";
-    //     const pair = "tEOSUSD";
-    //     return divergence(columns, pos, timeFrame, pair)
-    //         .then(function (data) {
-    //             expect(data.direction).to.equal('bullish');
-    //         })
-    // });
+    it('Should return confirmed bullish divergence', () => {
+        const columns = confirmedBullishDivergence;
+        const pos = 6;
+        const timeFrame = "1h";
+        const pair = "tEOSUSD";
+        return divergence(columns, pos, timeFrame, pair)
+            .then(function (data) {
+                expect(data.direction).to.equal('bullish');
+            })
+    });
 });
