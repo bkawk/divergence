@@ -10,22 +10,22 @@ const slope = require('./slope');
  * @return {object} divergence report
  */
 module.exports = function divergenceStrategy(column, pair, timeFrame) {
-    return new Promise(function(resolve, reject) {
-        column.forEach((i) => {
+
+    return new Promise(function (resolve, reject) {
+        let i;
+        for (i = 0; i <= 18; i++){
             if (
-                i <= 18 &&
-                column[2].priceSpike === 'up' &&
+                column.length <= 19 &&
+                column[1].priceSpike === 'up' &&
                 column[i].priceSpike === 'up' &&
-                column[2].rsiSpike === 'up' &&
+                column[1].rsiSpike === 'up' &&
                 column[i].rsiSpike === 'up' &&
-                column[i].priceValue < column[2].priceValue &&
-                column[i].rsiValue > column[2].rsiValue
+                column[i].priceValue < column[1].priceValue &&
+                column[i].rsiValue > column[1].rsiValue
             ) {
-                console.log('Bearish Divergence Found');
-                console.log(column);
-                const firstPriceSpikeValue = column[2].priceValue;
+                const firstPriceSpikeValue = column[1].priceValue;
                 const secondPriceSpikeValue = column[i].priceValue;
-                const firstRsiSpikeValue = column[2].rsiValue;
+                const firstRsiSpikeValue = column[1].rsiValue;
                 const secondRsiSpikeValue = column[i].rsiValue;
                 let x;
                 for (x = 2; x <= i; x++) {
@@ -36,26 +36,29 @@ module.exports = function divergenceStrategy(column, pair, timeFrame) {
                         const period = i;
                         const direction = 'bearish';
                         const data = column;
-                        resolve({divergence, period, direction, pair, timeFrame, data});
+                        const slope = true;
+                        console.log("bearish slope true")
+                        resolve({ divergence, period, direction, pair, timeFrame, data, slope });
+                        break;
                     } else {
+                        console.log("bearish slop false")
+                        resolve({ divergence: true, slope: false, direction: 'bearish' })
                         break;
                     }
                 }
-            }
+            } 
             if (
-                i <= 18 &&
-                column[2].priceSpike === 'down' &&
+                column.length <= 19 &&
+                column[1].priceSpike === 'down' &&
                 column[i].priceSpike === 'down' &&
-                column[2].rsiSpike === 'down' &&
+                column[1].rsiSpike === 'down' &&
                 column[i].rsiSpike === 'down' &&
-                column[i].priceValue > column[2].priceValue &&
-                column[i].rsiValue < column[2].rsiValue
+                column[i].priceValue > column[1].priceValue &&
+                column[i].rsiValue < column[1].rsiValue
             ) {
-                console.log('Bullish Divergence Found');
-                console.log(column);
-                const firstPriceSpikeValue = column[2].priceValue;
+                const firstPriceSpikeValue = column[1].priceValue;
                 const secondPriceSpikeValue = column[i].priceValue;
-                const firstRsiSpikeValue = column[2].rsiValue;
+                const firstRsiSpikeValue = column[1].rsiValue;
                 const secondRsiSpikeValue = column[i].rsiValue;
                 let x;
                 for (x = 2; x <= i; x++) {
@@ -66,12 +69,19 @@ module.exports = function divergenceStrategy(column, pair, timeFrame) {
                         const period = i;
                         const direction = 'bullish';
                         const data = column;
-                        resolve({divergence, period, direction, pair, timeFrame, data});
+                        const slope = true;
+                        console.log("bullish slope true")
+                        resolve({ divergence, period, direction, pair, timeFrame, data, slope });
+                        break;
                     } else {
+                        console.log("bullish slope false")
+                        resolve({ divergence: true, slope: false, direction: 'bullish' })
                         break;
                     }
                 }
             }
-        });
+        };
+            console.log("no divergence 1st");
+            resolve({ divergence: false })
     });
 };
