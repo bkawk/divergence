@@ -1,6 +1,6 @@
 'use strict';
 const isJson = require('../functions/isJson');
-const divergenceStrategy = require('./divergenceStrategy');
+const divergence = require('./divergence');
 const spike = require('./spike');
 /**
  * Detect Divegence
@@ -28,18 +28,16 @@ module.exports = function createColumns(price, rsi, timeFrame, pair) {
                 };
             }
         });
-        if (columns.length > 1) {
-            Promise.all([divergenceStrategy(columns, pair, timeFrame)])
-            .then(function(res) {
-                res.forEach((data) => {
-                    if (data.divergence) {
-                        resolve(data);
-                    };
-                });
-            })
-            .catch(function(err) {
-                console.error('Promise.all error', err);
-            });
+        if (columns.length >= 18) {
+            let i;
+            for (i = 0; i <= 18; i++){
+                if (i > 2) {
+                    divergence(columns, i, timeFrame, pair)
+                    .then((result) => {
+                        resolve(result);
+                    })
+                }
+            };
         }
     });
 };

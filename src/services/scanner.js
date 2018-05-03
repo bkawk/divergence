@@ -24,10 +24,12 @@ module.exports = class ScannerService {
                     return createColumns(price, rsi, timeFrame, pair);
                 })
                 .then((divergence) => {
-                    console.log('Divergence Found');
-                    const key = `divergence~${divergence.pair}~${divergence.timeFrame}`;
-                    const value = {pair: divergence.pair, timeFrame: divergence.timeFrame, period: divergence.period, direction: divergence.direction, column: divergence.data};
-                    dbSet(key, value);
+                    if (divergence.direction != 'none') {
+                        console.log('Divergence Found');
+                        const key = `divergence~${divergence.pair}~${divergence.timeFrame}~${divergence.time}`;
+                        const value = divergence
+                        dbSet(key, value);
+                    }
                 })
                 .catch((error) => {
                     console.log(error);
