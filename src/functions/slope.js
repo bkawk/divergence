@@ -21,10 +21,10 @@ module.exports = function slope(direction, columns, pos, timeFrame, pair) {
                 if (i+1 >= columns[1].column && i+1 <= columns[pos].column) {
                     let priceSlope = (columns[pos].priceValue - columns[1].priceValue) / (1-period);
                     let rsiSlope = (columns[pos].rsiValue - columns[1].rsiValue) / (1-period);
-                    console.log(priceSlope);
-                    console.log(rsiSlope);
                     let maxPrice = columns[1].priceValue + (priceSlope * i);
                     let maxRsi = columns[1].rsiValue + (rsiSlope * i);
+                    console.log(maxPrice);
+                    console.log(maxRsi);
                     if (maxPrice > column.priceValue || maxRsi > column.rsiValue) {
                         resolve({direction: 'none', period, timeFrame, pair});
                     } else {
