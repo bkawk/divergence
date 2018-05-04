@@ -1,6 +1,7 @@
 'use strict';
 const Ws = require('ws');
-const dbSet = require('../tasks/dbSet');
+const moment = require('moment');
+
 /**
 * A service that deal with bitfinex service
 */
@@ -70,12 +71,14 @@ module.exports = class BitFinexService {
                             const low = price[4];
                             const volume = price[5];
                             const time = price[0];
-                            const key = `price~${pair}~${timeFrame}~${time}`;
                             const value = {open, close, high, low, volume, time};
-                            let lastHour = new Date(`${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDay()} ${new Date().getHours()}:00`).getTime();
-                            if (time > lastHour) {
-                                pairData.push(value);
-                                dbSet(key, value);
+                            const itemTime = moment(time).format('MMMM Do YYYY, H');
+                            const lastHour = moment().format('MMMM Do YYYY, H');
+                            if (itemTime != lastHour) {
+                                const lastRecord = pairData[pairData.length-1];
+                                if (lastRecord != value) {
+                                    pairData.push(value);
+                                }
                             }
                         });
                     } else {
@@ -85,17 +88,19 @@ module.exports = class BitFinexService {
                         const low = price[4];
                         const volume = price[5];
                         const time = price[0];
-                        const key = `price~${pair}~${timeFrame}~${time}`;
                         const value = {open, close, high, low, volume, time};
-                        const lastHour = new Date(`${new Date().getFullYear()}-${new Date().getMonth()}-${new Date().getDay()} ${new Date().getHours()}:00`).getTime();
-                        if (time > lastHour) {
-                            pairData.push(value);
-                            dbSet(key, value);
+                        const itemTime = moment(time).format('MMMM Do YYYY, H');
+                        const lastHour = moment().format('MMMM Do YYYY, H');
+                        if (itemTime != lastHour) {
+                            const lastRecord = pairData[pairData.length-1];
+                            if (lastRecord != value) {
+                                pairData.push(value);
+                            }
                         }
                     }
-                    if (pairData.length >= 150) {
-                        pairData.shift();
-                    }
+                    // if (pairData.length >= 150) {
+                    //     pairData.pop();
+                    // }
                     if (
                         this.bitfinexData.length === bitfinexSubscriptions.length &&
                         initialDataComplete === 0) {

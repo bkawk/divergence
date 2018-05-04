@@ -1,5 +1,5 @@
 'use strict';
-
+const moment = require('moment');
 /**
  * Calculate Slope
  * Is the price or rsi value higher than the slope value
@@ -12,48 +12,42 @@
  */
 module.exports = function slope(direction, columns, pos, timeFrame, pair) {
     return new Promise((resolve, reject) => {
-        const period = columns[pos].column - columns[1].column;
+        const period = columns[pos].column;
         const time = columns[1].time;
+        const endTime = columns[pos].time;
+        const priceY1 = columns[1].priceValue;
+        const priceY2 = columns[pos].priceValue;
+        const rsiY1 = columns[1].rsiValue;
+        const rsiY2 = columns[pos].rsiValue;
+        const priceSlope = (priceY2- priceY1) / period;
+        const rsiSlope = (rsiY2 - rsiY1) / period;
+        const divergenceColumn = columns[pos].column;
+        let testData = [];
         if (period <= 3) {
-            resolve({direction, period, timeFrame, pair, time});
-        } else if (direction == 'bullish') {
-            columns.forEach((column, i) => {
-                if (i >= columns[1].column && i+2 <= columns[pos].column) {
-                    let X1 = period+1;
-                    let X2 = 1;
-                    let priceY1 = columns[1].priceValue;
-                    let priceY2 = columns[pos].priceValue;
-                    let rsiY1 = columns[1].rsiValue;
-                    let rsiY2 = columns[pos].rsiValue;
-                    let priceSlope = (priceY1 - priceY2) / (X2-X1);
-                    let rsiSlope = (rsiY1 - rsiY2) / (X2-X1);
-                    let priceMax = columns[1].priceValue + ((i-1) * priceSlope);
-                    let rsiMax = columns[1].rsiValue + ((i-1) * rsiSlope);
-                    if (column.priceValue > priceMax || column.rsiValue > rsiMax) {
-                        resolve({direction: 'none', period, timeFrame, pair});
-                    }
-                }
-            });
+            // console.log('------- START ---------');
+            // console.log(moment(time).format('MMMM Do YYYY, H'));
+            // console.log('------- DIVERGENCE  ---------');
+            // console.log({direction, period, timeFrame, pair, time});
+            // console.log('------- END ---------');
+            // console.log(moment(endTime).format('MMMM Do YYYY, H'));
             resolve({direction, period, timeFrame, pair, time});
         } else {
             columns.forEach((column, i) => {
-                if (i >= columns[1].column && i+2 <= columns[pos].column) {
-                    let X1 = period+1;
-                    let X2 = 1;
-                    let priceY1 = columns[1].priceValue;
-                    let priceY2 = columns[pos].priceValue;
-                    let rsiY1 = columns[1].rsiValue;
-                    let rsiY2 = columns[pos].rsiValue;
-                    let priceSlope = (priceY1 - priceY2) / (X2-X1);
-                    let rsiSlope = (rsiY1 - rsiY2) / (X2-X1);
-                    let priceMax = columns[1].priceValue + ((i-1) * priceSlope);
-                    let rsiMax = columns[1].rsiValue + ((i-1) * rsiSlope);
-                    if (column.priceValue > priceMax || column.rsiValue > rsiMax) {
+                if (i > columns[1].column && i < divergenceColumn) {
+                    testData.push(column);
+                    let priceLine = ((i-1) * priceSlope) + priceY1;
+                    let rsiLine = ((i-1) * rsiSlope) + rsiY1;
+                    if (column.priceValue > priceLine || column.rsiValue > rsiLine) {
                         resolve({direction: 'none', period, timeFrame, pair});
                     }
                 }
             });
+            // console.log(moment(time).format('MMMM Do YYYY, h:mm:ss a'));
+            // console.log('------- DIVERGENCE  ---------');
+            // console.log({direction, period, timeFrame, pair, time});
+            // console.log('------- END ---------');
+            // console.log(moment(endTime).format('MMMM Do YYYY, h:mm:ss a'));
             resolve({direction, period, timeFrame, pair, time});
-        }
+        };
     });
 };

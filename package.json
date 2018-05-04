@@ -30,6 +30,7 @@
     "leveldown": "^3.0.1",
     "levelup": "^2.0.2",
     "mocha": "^5.1.1",
+    "moment": "^2.22.1",
     "promise-with-status": "^1.0.0",
     "request": "^2.85.0",
     "request-rate-limiter": "^1.0.2",

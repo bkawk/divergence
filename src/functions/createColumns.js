@@ -13,11 +13,18 @@ const spike = require('./spike');
  */
 module.exports = function createColumns(price, rsi, timeFrame, pair) {
     return new Promise(function(resolve, reject) {
-        let columns = [];
-        price.forEach((entry, i) => {
-            if (price && i > 0 && i < 20) {
-                const priceSpike = spike(price[i + 1].close, price[i].close, price[i - 1].close);
-                const rsiSpike = spike(rsi[i + 1], rsi[i], rsi[i - 1]);
+        if (price && rsi) {
+            let columns = [];
+            let i;
+            for (i = 0; i <= 18; i++) {
+                const closeLeft = price[i+2].close;
+                const closeTarget = price[i+1].close;
+                const closeRight = price[i].close;
+                const rsiLeft = rsi[i+2];
+                const rsiTarget = rsi[i+1];
+                const rsiRight = rsi[i];
+                const priceSpike = spike(closeLeft, closeTarget, closeRight);
+                const rsiSpike = spike(rsiLeft, rsiTarget, rsiRight);
                 const column = i;
                 const priceValue = price[i].close;
                 const rsiValue = rsi[i];
@@ -26,18 +33,20 @@ module.exports = function createColumns(price, rsi, timeFrame, pair) {
                 if (isJson(data)) {
                     columns.push(data);
                 };
-            }
-        });
-        if (columns.length >= 18) {
-            let i;
-            for (i = 0; i <= 18; i++) {
-                if (i > 2) {
+            };
+
+            if (columns.length >= 19) {
+                let i;
+                for (i = 0; i < 19; i++) {
                     divergence(columns, i, timeFrame, pair)
                     .then((result) => {
                         resolve(result);
+                    })
+                    .catch((error) => {
+                        console.log(error);
                     });
-                }
-            };
+                };
+            }
         }
     });
 };

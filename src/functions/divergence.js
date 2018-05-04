@@ -23,6 +23,9 @@ module.exports = function divergence(columns, pos, timeFrame, pair) {
             slope('bullish', columns, pos, timeFrame, pair)
             .then((confirmed) => {
                 resolve(confirmed);
+            })
+            .catch((error) => {
+                console.log(error);
             });
         } else if (
             columns[1].priceSpike === 'up' &&
@@ -35,6 +38,9 @@ module.exports = function divergence(columns, pos, timeFrame, pair) {
             slope('bearish', columns, pos, timeFrame, pair)
             .then((confirmed) => {
                 resolve(confirmed);
+            })
+            .catch((error) => {
+                console.log(error);
             });
         } else {
             const period = columns[pos] - columns[1];
