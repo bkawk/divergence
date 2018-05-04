@@ -1,30 +1,17 @@
-const createColumn = require('../src/functions/createColumns');
-var chai = require('chai'),
-    expect = chai.expect,
-    assert = chai.assert;
+const createColumns = require('../src/functions/createColumns');
+const priceData = require('./data/priceData.js');
+const rsiData = require('./data/rsiData.js');
+const chai = require('chai'), should = chai.should, expect = chai.expect, assert = chai.assert;
 
-describe('Create Column tests', function () {
-    const price = [16.82];
-    const rsi =[39.21];
-    const timeFrame = "1h";
-    const pair = "tEOSUSD";
-
-    it('Should return promise pending with current sample data', function () {
-        // const promise = createColumn(price, rsi, timeFrame, pair);
-        // promise.then(() => {
-        //     expect(promise.status).to.be.eq("Pending");
-        //     done();
-        // });
+describe('Calculate Columns', () => {
+    it('Should create columns and find divergences', () => {
+        const price = priceData;
+        const rsi = rsiData;
+        const timeFrame = '1h';
+        const pair = 'tBTCUSD';
+        return createColumns(price, rsi, timeFrame, pair)
+            .then(function(result) {
+                expect(result.pair).to.equal(pair);
+            })
     });
-
-    it('Should call divergance strategy linear with column length', function () {
-
-
-    });
-    it('Column called should be maxed 18 even Price length is higher', function () {
-
-    });
-    it('When Column empty should not give any data', function () {
-
-    });
-});
+})
