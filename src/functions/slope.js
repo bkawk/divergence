@@ -25,11 +25,11 @@ module.exports = function slope(direction, columns, pos, timeFrame, pair) {
         let testData = [];
         if (period <= 3) {
             // console.log('------- START ---------');
-            // console.log(moment(time).format('MMMM Do YYYY, H'));
+            console.log(moment(time).format('MMMM Do YYYY, H'));
             // console.log('------- DIVERGENCE  ---------');
             // console.log({direction, period, timeFrame, pair, time});
             // console.log('------- END ---------');
-            // console.log(moment(endTime).format('MMMM Do YYYY, H'));
+            console.log(moment(endTime).format('MMMM Do YYYY, H'));
             resolve({direction, period, timeFrame, pair, time});
         } else {
             columns.forEach((column, i) => {

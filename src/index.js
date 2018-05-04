@@ -35,7 +35,7 @@ setImmediate(() => {
                 }
                 scannerService.scan(bitfinexService.bitfinexData);
             }, 10000);
-        })                
+        })
         .catch((error) => {
             console.log(error);
         });
