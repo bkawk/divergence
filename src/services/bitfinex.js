@@ -7,17 +7,17 @@ const moment = require('moment');
 * @param {Object[]} timeFrames the time frame needed
 * @param {Object[]} pairs the pairs to observe
 * @param {string} apiUrl the bitfinex api url
-*
+* @return {bitfinexService} bitfinexService to subscribe and get bitfinex data
 */
-module.exports = function (timeFrames, pairs, apiUrl) {
+module.exports = function(timeFrames, pairs, apiUrl) {
     let bitfinexData = [];
     return {
-        bitfinexData : bitfinexData,
+        bitfinexData: bitfinexData,
         /**
          * Get Bitfinex Data
          * @return {bitfinexSubscriptions[]} subscriptions promise
          */
-        createBitfinexSubscriptions: function () {
+        createBitfinexSubscriptions: function() {
             return new Promise((resolve, reject) => {
                 let bitfinexSubscriptions = [];
                 timeFrames.forEach((timeFrames) => {
@@ -25,7 +25,7 @@ module.exports = function (timeFrames, pairs, apiUrl) {
                         const event = 'subscribe';
                         const channel = 'candles';
                         const key = `trade:${timeFrames}:t${pairs}`;
-                        bitfinexSubscriptions.push({ event, channel, key });
+                        bitfinexSubscriptions.push({event, channel, key});
                     });
                 });
                 resolve(bitfinexSubscriptions);
@@ -36,7 +36,7 @@ module.exports = function (timeFrames, pairs, apiUrl) {
          * @param {bitfinexSubscriptions[]} bitfinexSubscriptions
          * @return {bitfinexData[]} bitfinexData promise
          */
-        getBitfinexData: function (bitfinexSubscriptions) {
+        getBitfinexData: function(bitfinexSubscriptions) {
             return new Promise((resolve, reject) => {
                 let initialDataComplete = 0;
                 const w = new Ws(apiUrl);
@@ -50,7 +50,7 @@ module.exports = function (timeFrames, pairs, apiUrl) {
                         timeFrame = item[1];
                         const chanId = msg.chanId;
                         const data = [];
-                        bitfinexData.push({ pair, timeFrame, chanId, data });
+                        bitfinexData.push({pair, timeFrame, chanId, data});
                     } else if (msg[0] != undefined && msg[1] != 'hb') {
                         const chanId = msg[0];
                         const price = msg[1];
@@ -66,7 +66,7 @@ module.exports = function (timeFrames, pairs, apiUrl) {
                                 const low = price[4];
                                 const volume = price[5];
                                 const time = price[0];
-                                const value = { open, close, high, low, volume, time };
+                                const value = {open, close, high, low, volume, time};
                                 const itemTime = moment(time).format('MMMM Do YYYY, H');
                                 const lastHour = moment().format('MMMM Do YYYY, H');
                                 if (itemTime != lastHour) {
@@ -83,7 +83,7 @@ module.exports = function (timeFrames, pairs, apiUrl) {
                             const low = price[4];
                             const volume = price[5];
                             const time = price[0];
-                            const value = { open, close, high, low, volume, time };
+                            const value = {open, close, high, low, volume, time};
                             const itemTime = moment(time).format('MMMM Do YYYY, H');
                             const lastHour = moment().format('MMMM Do YYYY, H');
                             if (itemTime != lastHour) {
@@ -112,8 +112,8 @@ module.exports = function (timeFrames, pairs, apiUrl) {
                     });
                 });
             });
-        }
-    }
-}
+        },
+    };
+};
 
 

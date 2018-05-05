@@ -6,7 +6,7 @@ const dbSet = require('../tasks/dbSet');
  * A service that scans for divergences
 */
 module.exports = {
-        scan: function (bitfinexData) {
+        scan: function(bitfinexData) {
             new Promise((resolve, reject) => {
                 console.log(`Scanning Data`);
                 const dataArray = bitfinexData;
@@ -32,7 +32,7 @@ module.exports = {
                         });
                 });
             });
-        }
-    }
+        },
+    };
 
 

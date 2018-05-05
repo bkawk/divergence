@@ -3,21 +3,21 @@ var chai = require('chai'),
     expect = chai.expect,
     assert = chai.assert,
     deep = chai.deep;
-var chaiAsPromised = require('chai-as-promised');
-//calling should bef, solved chaiaspromised bug
+const chaiAsPromised = require('chai-as-promised');
+// calling should bef, solved chaiaspromised bug
 chai.should();
 chai.use(chaiAsPromised);
 const scannerService = require('../src/services/scanner');
 
-describe('Scanner tests', function () {
-     var dummyData = [
+describe('Scanner tests', function() {
+     const dummyData = [
 
-        { channel: 'candles', event: 'subscribe', key: 'trade:1h:tEOSUSD' },
-        { channel: 'candles', event: 'subscribe', key: 'trade:1h:tZRXUSD' },
-        { channel: 'candles', event: 'subscribe', key: 'trade:2h:tEOSUSD' },
-        { channel: 'candles', event: 'subscribe', key: 'trade:2h:tZRXUSD' }];
+        {channel: 'candles', event: 'subscribe', key: 'trade:1h:tEOSUSD'},
+        {channel: 'candles', event: 'subscribe', key: 'trade:1h:tZRXUSD'},
+        {channel: 'candles', event: 'subscribe', key: 'trade:2h:tEOSUSD'},
+        {channel: 'candles', event: 'subscribe', key: 'trade:2h:tZRXUSD'}];
 
-    it('scan should return pending promise', function () {
+    it('scan should return pending promise', function() {
 
     });
 
