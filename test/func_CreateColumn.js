@@ -1,4 +1,4 @@
-const createColumns = require('../src/functions/createColumns');
+const createColumns = require('../src/functions/createColumns.js');
 const priceData = require('./data/priceData.js');
 const rsiData = require('./data/rsiData.js');
 const chai = require('chai'), should = chai.should, expect = chai.expect, assert = chai.assert;

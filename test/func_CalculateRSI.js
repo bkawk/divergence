@@ -1,4 +1,4 @@
-const rsi = require('../src/functions/rsi');
+const rsi = require('../src/functions/rsi.js');
 const priceData = require('./data/priceData.js');
 const chai = require('chai'), should = chai.should, expect = chai.expect, assert = chai.assert;
 

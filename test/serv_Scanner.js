@@ -7,7 +7,7 @@ const chaiAsPromised = require('chai-as-promised');
 // calling should bef, solved chaiaspromised bug
 chai.should();
 chai.use(chaiAsPromised);
-const scannerService = require('../src/services/scanner');
+const scannerService = require('../src/dataScanner.js');
 
 describe('Scanner tests', function() {
      const dummyData = [

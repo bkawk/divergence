@@ -10,7 +10,7 @@ const chaiAsPromised = require('chai-as-promised');
 chai.should();
 chai.use(chaiAsPromised);
 
-const bitfinex = require('../src/services/bitfinex');
+const bitfinex = require('../src/bitfinexData.js');
 
 describe('Bitfinex tests', function () {
     const timeFrames = ['1h', '2h'];
