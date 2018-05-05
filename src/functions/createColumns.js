@@ -1,5 +1,5 @@
 'use strict';
-const isJson = require('../functions/isJson');
+const isJson = require('./isJson');
 const divergence = require('./divergence');
 const spike = require('./spike');
 /**

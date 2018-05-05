@@ -1,8 +1,8 @@
 'use strict';
 const levelup = require('levelup');
 const leveldown = require('leveldown');
-const db = levelup(leveldown('./database'));
-const isJson = require('../functions/isJson');
+const db = levelup(leveldown('../database'));
+const isJson = require('./isJson');
 /**
  * Set Data
  * Set the data to level db
@@ -19,5 +19,3 @@ module.exports = function dbSet(key, value) {
         });
     }
 };
-
-
