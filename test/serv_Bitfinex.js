@@ -10,14 +10,14 @@ const chaiAsPromised = require('chai-as-promised');
 chai.should();
 chai.use(chaiAsPromised);
 
-const Bitfinex = require('../src/services/bitfinex');
+const bitfinex = require('../src/services/bitfinex');
 
 describe('Bitfinex tests', function () {
     const timeFrames = ["1h", "2h"];
     const pairs = ["EOSUSD", "ZRXUSD"];
     const apiUrl = "Dummy";
-    let bitfinexService = new Bitfinex(timeFrames, pairs, apiUrl);
-
+    let bitfinexService = bitfinex(timeFrames, pairs, apiUrl);
+    
     it("createBitfinexSubscriptions should return resolved promise", function () {
         return assert.isFulfilled(bitfinexService.createBitfinexSubscriptions(),"resolved");
     });
