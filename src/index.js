@@ -1,6 +1,6 @@
 'use strict';
-const Bitfinex = require('./services/bitfinex');
-const Scanner = require('./services/scanner');
+const bitfinex = require('./services/bitfinex');
+const scannerService = require('./services/scanner');
 /**
 * Start
 */
@@ -14,8 +14,7 @@ const pairs = ['EOSUSD', 'ZRXUSD', 'AIDUSD', 'AIOUSD', 'REPUSD', 'AVTUSD', 'BATU
 const apiUrl = 'wss://api.bitfinex.com/ws/2';
 
 setImmediate(() => {
-    const bitfinexService = new Bitfinex(timeFrames, pairs, apiUrl);
-    const scannerService = new Scanner();
+    const bitfinexService = bitfinex(timeFrames, pairs, apiUrl);
     bitfinexService.createBitfinexSubscriptions()
         .then((bitfinexSubscriptions) => {
             return bitfinexService.getBitfinexData(bitfinexSubscriptions);
@@ -29,7 +28,7 @@ setImmediate(() => {
                 }
                 const minutes = new Date().getMinutes();
                 const seconds = new Date().getSeconds();
-                if (minutes === 0 && seconds === 0 ) {
+                if (minutes === 0 && seconds === 0) {
                     console.log(`Top of the hour is now`);
                     scannerService.scan(bitfinexService.bitfinexData);
                 }
