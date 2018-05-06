@@ -1,8 +1,7 @@
 var chai = require('chai'),
     should = chai.should,
     expect = chai.expect,
-    assert = chai.assert,
-    deep = chai.deep;
+    assert = chai.assert;
 const chaiAsPromised = require('chai-as-promised');
 // calling should bef, solved chaiaspromised bug
 chai.should();

@@ -1,4 +1,5 @@
 module.exports = {
+    "parser" : "babel-eslint",
     "extends": "google",
     "env": {
         "browser": false,
