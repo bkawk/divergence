@@ -2,16 +2,15 @@
 const Ws = require('ws');
 const moment = require('moment');
 const apiUrl = 'wss://api.bitfinex.com/ws/2';
-let bitfinexData = [];
+
 /**
  * Get Bitfinex Data
  * @param {array} subscriptions
- * @return {array} bitfinexData
  */
-module.exports = function bitfinex(subscriptions) {
-    return new Promise((resolve, reject) => {
+module.exports = async (subscriptions) => {
         let initialDataComplete = 0;
         const w = new Ws(apiUrl);
+        let bitfinexData = [];
         w.on('message', (_msg) => {
             const msg = JSON.parse(_msg);
             let timeFrame;
@@ -74,7 +73,7 @@ module.exports = function bitfinex(subscriptions) {
                     initialDataComplete = 1;
                     console.log(`Initial Bitfinex data complete`);
                     console.log(`Listening for more data on websockets`);
-                    resolve(bitfinexData);
+                    return bitfinexData;
                 }
             }
         });
@@ -83,5 +82,5 @@ module.exports = function bitfinex(subscriptions) {
                 w.send(JSON.stringify(subscriptions[i]));
             });
         });
-    });
-};
+    };
+

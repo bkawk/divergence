@@ -10,8 +10,7 @@ const moment = require('moment');
  * @param {string} pair The proce data
  * @return {boolean} true or false
  */
-module.exports = function slope(direction, columns, pos, timeFrame, pair) {
-    return new Promise((resolve, reject) => {
+module.exports = async (direction, columns, pos, timeFrame, pair) => {
         const period = columns[pos].column;
         const time = columns[1].time;
         const endTime = columns[pos].time;
@@ -38,7 +37,7 @@ module.exports = function slope(direction, columns, pos, timeFrame, pair) {
                     let priceLine = ((i-1) * priceSlope) + priceY1;
                     let rsiLine = ((i-1) * rsiSlope) + rsiY1;
                     if (column.priceValue > priceLine || column.rsiValue > rsiLine) {
-                        resolve({direction: 'none', period, timeFrame, pair});
+                        return {direction: 'none', period, timeFrame, pair};
                     }
                 }
             });
@@ -47,7 +46,6 @@ module.exports = function slope(direction, columns, pos, timeFrame, pair) {
             // console.log({direction, period, timeFrame, pair, time});
             // console.log('------- END ---------');
             // console.log(moment(endTime).format('MMMM Do YYYY, h:mm:ss a'));
-            resolve({direction, period, timeFrame, pair, time});
+            return {direction, period, timeFrame, pair, time};
         };
-    });
 };

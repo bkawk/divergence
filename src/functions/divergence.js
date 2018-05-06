@@ -10,8 +10,7 @@ const slope = require('./slope');
  * @return {object} containing a direction, pair, timeframe and time.
  */
 
-module.exports = function divergence(columns, pos, timeFrame, pair) {
-    return new Promise((resolve, reject) => {
+module.exports = async (columns, pos, timeFrame, pair) => {
         if (
             columns[1].priceSpike === 'down' &&
             columns[pos].priceSpike === 'down' &&
@@ -20,13 +19,12 @@ module.exports = function divergence(columns, pos, timeFrame, pair) {
             columns[pos].priceValue > columns[1].priceValue &&
             columns[pos].rsiValue < columns[1].rsiValue
         ) {
-            slope('bullish', columns, pos, timeFrame, pair)
-            .then((confirmed) => {
-                resolve(confirmed);
-            })
-            .catch((error) => {
+            try {
+                let confirmed = await slope('bullish', columns, pos, timeFrame, pair);
+                return confirmed;
+            } catch (error) {
                 console.log(error);
-            });
+            }
         } else if (
             columns[1].priceSpike === 'up' &&
             columns[pos].priceSpike === 'up' &&
@@ -35,16 +33,14 @@ module.exports = function divergence(columns, pos, timeFrame, pair) {
             columns[pos].priceValue < columns[1].priceValue &&
             columns[pos].rsiValue > columns[1].rsiValue
         ) {
-            slope('bearish', columns, pos, timeFrame, pair)
-            .then((confirmed) => {
-                resolve(confirmed);
-            })
-            .catch((error) => {
+            try {
+                let confirmed = await slope('bearish', columns, pos, timeFrame, pair);
+                return confirmed;
+            } catch (error) {
                 console.log(error);
-            });
+            }
         } else {
             const period = columns[pos] - columns[1];
-            resolve({direction: 'none', period, timeFrame, pair});
+            return {direction: 'none', period, timeFrame, pair};
         }
-    });
 };

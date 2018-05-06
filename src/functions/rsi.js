@@ -7,8 +7,7 @@ const RSI = require('@solazu/technicalindicators').RSI;
  * @param {object} priceArray The proce data
  * @return {object} the RSI Array and close Arrays
  */
-module.exports = function rsi(priceArray) {
-    return new Promise(function(resolve, reject) {
+module.exports = async (priceArray) => {
         let values = [];
         priceArray.forEach((entry) => {
             if (entry.close) {
@@ -20,7 +19,6 @@ module.exports = function rsi(priceArray) {
         if (values.length > 0 && rsiArray.length > 0) {
             const priceArrayTrimmed = priceArray.slice(0, 21);
             const rsiArrayTrimmed = rsiArray.slice(0, 21);
-            resolve([priceArrayTrimmed, rsiArrayTrimmed]);
+            return [priceArrayTrimmed, rsiArrayTrimmed];
         }
-    });
 };

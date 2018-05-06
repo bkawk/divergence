@@ -9,10 +9,8 @@ const spike = require('./spike');
  * @param {object} rsi The rsi array data
  * @param {object} timeFrame The timeframe
  * @param {object} pair The pair
- * @return {boolean} has a divergence been found true/false
  */
-module.exports = function createColumns(price, rsi, timeFrame, pair) {
-    return new Promise(function(resolve, reject) {
+module.exports = async (price, rsi, timeFrame, pair) => {
         if (price && rsi) {
             let columns = [];
             let i;
@@ -40,7 +38,7 @@ module.exports = function createColumns(price, rsi, timeFrame, pair) {
                 for (i = 0; i < 19; i++) {
                     divergence(columns, i, timeFrame, pair)
                     .then((result) => {
-                        resolve(result);
+                        return result;
                     })
                     .catch((error) => {
                         console.log(error);
@@ -48,5 +46,4 @@ module.exports = function createColumns(price, rsi, timeFrame, pair) {
                 };
             }
         }
-    });
 };
