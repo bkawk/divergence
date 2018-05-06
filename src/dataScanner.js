@@ -11,17 +11,20 @@ module.exports = async (bitfinexData) => {
     const dataArray = bitfinexData;
     await dataArray.forEach(async (results) => {
         try {
-            let rsiAndPrice = await rsi(results.data);
-            const price = rsiAndPrice[0];
-            const rsiResult = rsiAndPrice[1];
-            const timeFrame = results.timeFrame;
-            const pair = results.pair;
-            let divergence = await createColumns(price, rsiResult, timeFrame, pair);
-            if (divergence.direction != 'none') {
-                console.log('Divergence Found');
-                const key = `divergence~${divergence.pair}~${divergence.timeFrame}~${divergence.time}`;
-                const value = divergence;
-                dbSet(key, value);
+            // has data then process
+            if (results.data.length > 0) {
+                let rsiAndPrice = await rsi(results.data);
+                const price = rsiAndPrice[0];
+                const rsiResult = rsiAndPrice[1];
+                const timeFrame = results.timeFrame;
+                const pair = results.pair;
+                let divergence = await createColumns(price, rsiResult, timeFrame, pair);
+                if (divergence.direction != 'none') {
+                    console.log('Divergence Found');
+                    const key = `divergence~${divergence.pair}~${divergence.timeFrame}~${divergence.time}`;
+                    const value = divergence;
+                    dbSet(key, value);
+                }
             }
         } catch (error) {
             console.log(error);

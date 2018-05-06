@@ -9,6 +9,7 @@ const spike = require('./spike');
  * @param {object} rsi The rsi array data
  * @param {object} timeFrame The timeframe
  * @param {object} pair The pair
+ * @return {divergence} divergence the divergence
  */
 module.exports = async (price, rsi, timeFrame, pair) => {
         if (price && rsi) {
@@ -36,13 +37,12 @@ module.exports = async (price, rsi, timeFrame, pair) => {
             if (columns.length >= 19) {
                 let i;
                 for (i = 0; i < 19; i++) {
-                    divergence(columns, i, timeFrame, pair)
-                    .then((result) => {
-                        return result;
-                    })
-                    .catch((error) => {
+                    try {
+                     let result = await divergence(columns, i, timeFrame, pair);
+                      return result;
+                    } catch (error) {
                         console.log(error);
-                    });
+                    }
                 };
             }
         }

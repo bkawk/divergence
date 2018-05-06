@@ -22,7 +22,10 @@
                 "${workspaceFolder}/test"
             ],
             "console": "integratedTerminal",
-            "internalConsoleOptions": "neverOpen"
+            "internalConsoleOptions": "neverOpen",
+            "skipFiles": [
+            ],
+            "smartStep": true
         },
         {
             "type": "node",

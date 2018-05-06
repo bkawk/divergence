@@ -15,7 +15,10 @@ async function run() {
     try {
         console.log(`Divergence Detector Started`);
         let subscriptionsResp = await subscriptions();
-        let bitfinexDataResp = await bitfinexData(subscriptionsResp);
+        let bitfinexDataResp = await bitfinexData(subscriptionsResp).catch(
+            (error)=>{
+            console.log(util.format('Error at bitfinexData: %s', error));
+        });
         setScanner(bitfinexDataResp);
     } catch (error) {
         console.log(util.format('Error at run: %s', error));
@@ -34,12 +37,13 @@ async function setScanner(data) {
         }
         const minutes = new Date().getMinutes();
         const seconds = new Date().getSeconds();
-       
+
         try {
             if (minutes === 0 && seconds === 0) {
                 console.log(`Top of the hour is now`);
-                await dataScanner(data);
+                dataScanner(data);
             }
+            dataScanner(data);
         } catch (error) {
             console.log(util.format('Error at scan: %s', error));
         }
