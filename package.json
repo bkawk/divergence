@@ -4,10 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "nyc mocha --exit --timeout 180000 test/*.js",
-    "test-unit": "nyc mocha --exit test/unit_*",
-    "test-func": "nyc mocha --exit test/func_*",
-    "test-serv": "nyc mocha --exit test/serv_*",
+    "test": "nyc mocha --recursive --exit --timeout 180000 test/",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "lint": "./node_modules/.bin/eslint src/*",
     "now": "node src/index.js"
